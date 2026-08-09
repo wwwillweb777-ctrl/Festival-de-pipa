@@ -12,7 +12,6 @@
                 extend: {
                     colors: {
                         primario: '#0284c7',
-                        destaque: '#D4AF37',
                         participante: '#10B981',
                         patrocinador: '#F59E0B',
                         admin: '#7C3AED',
@@ -23,32 +22,17 @@
     </script>
     <style>
         .sombra-card { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
-        .carregamento {
-            position: fixed; top: 25px; right: 25px; z-index: 1000;
-            display: flex; align-items: center; gap: 12px; padding: 12px 20px;
-            background: white; border-radius: 50px; box-shadow: 0 3px 12px rgba(0,0,0,0.1);
-        }
-        .circulo-girante {
-            width: 28px; height: 28px; border-radius: 50%;
-            border: 3px solid transparent; border-top: 3px solid #0284c7;
-            animation: girar 1s linear infinite;
-        }
-        @keyframes girar { 100% { transform: rotate(360deg); } }
-        .botao-bloqueado { opacity: 0.6; cursor: not-allowed; }
         .escondido { display: none !important; }
     </style>
 </head>
 <body class="bg-sky-50 min-h-screen font-sans">
 
-    <!-- ✅ CABEÇALHO COM IMAGEM + INFORMAÇÕES DO EVENTO -->
     <header class="text-center py-6 px-4 bg-white shadow-sm">
-        <!-- 🖼️ IMAGEM DO CARTAZ -->
         <img 
             src="https://i.postimg.cc/Rh0RYkm2/IMG-20260809-183550-(1).webp" 
             alt="Festival de Pipas — No Tijuco" 
             class="mx-auto rounded-xl shadow-lg max-w-2xl w-full h-auto mb-6"
         >
-        
         <h1 class="text-[clamp(1.8rem,5vw,2.8rem)] font-bold text-sky-800">🪁 FESTIVAL DE PIPAS — NO TIJUCO</h1>
         <div class="mt-4 max-w-2xl mx-auto space-y-2">
             <p class="text-lg text-gray-700 font-medium">📍 Rua Sidney Tavares Pereira</p>
@@ -58,113 +42,83 @@
         <p class="text-lg text-sky-600 mt-5 font-semibold">✨ Vamos participar!</p>
     </header>
 
-    <!-- AVISO DE CARREGAMENTO -->
-    <div id="areaCarregamento" class="carregamento escondido">
-        <div class="circulo-girante"></div>
-        <span class="text-gray-700">Salvando...</span>
-    </div>
-
     <main class="container mx-auto px-4 max-w-5xl pb-12 mt-8">
         <div class="grid md:grid-cols-2 gap-8 mb-10">
 
-            <!-- ✅ CARTÃO 1: SER PARTICIPANTE -->
+            <!-- PARTICIPANTE -->
             <div class="bg-white rounded-2xl sombra-card p-6 border-t-4 border-participante">
                 <h2 class="text-xl font-bold text-participante mb-5 flex items-center gap-2">
                     <i class="fa fa-user-check"></i> Quero Participar!
                 </h2>
-                <p class="text-gray-600 text-sm mb-5">Inscreva-se para participar do festival de pipas!</p>
-                
+                <p class="text-gray-600 text-sm mb-5">Inscreva-se para participar do festival!</p>
                 <div class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Seu Nome Completo</label>
                         <input type="text" id="nomeParticipante" placeholder="Digite seu nome"
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-participante/30 focus:border-participante outline-none">
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-200 focus:border-participante outline-none">
                     </div>
-                    <button id="btnParticipante"
-                        class="w-full bg-participante hover:bg-participante/90 text-white font-bold py-3 px-4 rounded-lg transition">
+                    <button onclick="salvarParticipante()"
+                        class="w-full bg-participante hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition">
                         ✅ Confirmar Participação
                     </button>
                 </div>
             </div>
 
-            <!-- ✅ CARTÃO 2: SER PATROCINADOR / APOIADOR -->
+            <!-- APOIADOR -->
             <div class="bg-white rounded-2xl sombra-card p-6 border-t-4 border-patrocinador">
                 <h2 class="text-xl font-bold text-patrocinador mb-5 flex items-center gap-2">
                     <i class="fa fa-star"></i> Quero Apoiar / Patrocinar!
                 </h2>
-                <p class="text-gray-600 text-sm mb-5">Quer ajudar com recursos, materiais, serviços ou qualquer forma de apoio?</p>
-                
+                <p class="text-gray-600 text-sm mb-5">Quer ajudar de alguma forma?</p>
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Seu Nome ou Razão Social</label>
-                        <input type="text" id="nomePatrocinador" placeholder="Seu nome ou nome da empresa"
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-patrocinador/30 focus:border-patrocinador outline-none">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Seu Nome</label>
+                        <input type="text" id="nomeApoiador" placeholder="Seu nome"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-200 focus:border-patrocinador outline-none">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">O que você oferece</label>
-                        <textarea id="descricaoApoio" rows="3" placeholder="Ex: doação de pipas, linha, materiais, serviços, transporte..."
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-patrocinador/30 focus:border-patrocinador outline-none resize-none"></textarea>
+                        <textarea id="ofertaApoio" rows="3" placeholder="Ex: doação de pipas, materiais, serviços..."
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-200 focus:border-patrocinador outline-none resize-none"></textarea>
                     </div>
-                    <button id="btnPatrocinador"
-                        class="w-full bg-patrocinador hover:bg-patrocinador/90 text-white font-bold py-3 px-4 rounded-lg transition">
+                    <button onclick="salvarApoiador()"
+                        class="w-full bg-patrocinador hover:bg-amber-600 text-white font-bold py-3 px-4 rounded-lg transition">
                         ⭐ Registrar Apoio
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- ✅ PAINÉIS DE VISUALIZAÇÃO -->
+        <!-- LISTAS -->
         <div class="grid md:grid-cols-2 gap-8">
-            <!-- LISTA DE PARTICIPANTES -->
             <div class="bg-white rounded-2xl sombra-card p-6">
                 <h2 class="text-lg font-bold text-sky-800 mb-4 flex items-center justify-between">
                     <span><i class="fa fa-users text-primario mr-2"></i> Participantes</span>
-                    <span id="qtdParticipantes" class="bg-sky-100 text-sky-800 px-3 py-1 rounded-full text-sm font-normal">0</span>
+                    <span id="qtdParticipantes" class="bg-sky-100 text-sky-800 px-3 py-1 rounded-full text-sm">0</span>
                 </h2>
                 <div id="listaParticipantes" class="space-y-2 max-h-80 overflow-y-auto pr-2">
-                    <p class="text-gray-400 text-center py-6">Nenhum participante ainda. Seja o primeiro! 🪁</p>
+                    <p class="text-gray-400 text-center py-6">Nenhum participante ainda 🪁</p>
                 </div>
             </div>
 
-            <!-- LISTA DE APOIADORES / PATROCINADORES -->
             <div class="bg-white rounded-2xl sombra-card p-6">
                 <h2 class="text-lg font-bold text-amber-700 mb-4 flex items-center justify-between">
-                    <span><i class="fa fa-hand-heart text-patrocinador mr-2"></i> Apoiadores / Patrocinadores</span>
-                    <span id="qtdPatrocinadores" class="bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-sm font-normal">0</span>
+                    <span><i class="fa fa-heart text-patrocinador mr-2"></i> Apoiadores</span>
+                    <span id="qtdApoiadores" class="bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-sm">0</span>
                 </h2>
-                <div id="listaPatrocinadores" class="space-y-2 max-h-80 overflow-y-auto pr-2">
-                    <p class="text-gray-400 text-center py-6">Nenhum apoiador ainda. Seja o primeiro! ⭐</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- ✅ PAINEL ADMINISTRATIVO -->
-        <div class="text-center mt-10">
-            <button id="botaoAdmin" class="text-gray-500 text-sm hover:text-admin transition">
-                🔐 Área Administrativa
-            </button>
-        </div>
-
-        <!-- ✅ MODAL DE SENHA -->
-        <div id="modalSenha" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 escondido">
-            <div class="bg-white rounded-2xl p-7 w-full max-w-sm mx-4">
-                <h3 class="text-xl font-bold text-center mb-5">🔐 Acesso Restrito</h3>
-                <input type="password" id="campoSenha" placeholder="Digite a senha"
-                    class="w-full px-4 py-3 border rounded-lg mb-4 text-center">
-                <p id="avisoErro" class="text-red-500 text-center text-sm mb-3 escondido">Senha incorreta!</p>
-                <div class="flex gap-3">
-                    <button id="btnCancelar" class="flex-1 bg-gray-200 rounded-lg py-2">Cancelar</button>
-                    <button id="btnEntrar" class="flex-1 bg-admin text-white rounded-lg py-2">Entrar</button>
+                <div id="listaApoiadores" class="space-y-2 max-h-80 overflow-y-auto pr-2">
+                    <p class="text-gray-400 text-center py-6">Nenhum apoiador ainda ⭐</p>
                 </div>
             </div>
         </div>
     </main>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-        import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
+    <!-- FIREBASE -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js"></script>
 
-        // ✅ FIREBASE — JÁ CONFIGURADO
+    <script>
+        // INICIA FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyCqsOq01FhDq9z9Wn0tK9XbP8mIeQ9z7yM",
             authDomain: "willobras.firebaseapp.com",
@@ -175,183 +129,100 @@
             appId: "1:66370500400:web:42d6569ca2c8172ddf3af5"
         };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.getDatabase(app);
 
-        // ✅ BANCO DE DADOS
-        const participantesRef = ref(db, "festival_pipas/participantes");
-        const apoiadoresRef = ref(db, "festival_pipas/apoiadores");
-
-        // ✅ CONFIGURAÇÕES
-        const SENHA_ADMIN = "WJ321";
-        let acessoAdmin = false;
-
-        // ✅ ELEMENTOS
-        const nomeParticipante = document.getElementById('nomeParticipante');
-        const btnParticipante = document.getElementById('btnParticipante');
-        const nomePatrocinador = document.getElementById('nomePatrocinador');
-        const descricaoApoio = document.getElementById('descricaoApoio');
-        const btnPatrocinador = document.getElementById('btnPatrocinador');
-        const listaParticipantesEl = document.getElementById('listaParticipantes');
-        const listaPatrocinadoresEl = document.getElementById('listaPatrocinadores');
-        const qtdParticipantes = document.getElementById('qtdParticipantes');
-        const qtdPatrocinadores = document.getElementById('qtdPatrocinadores');
-        const areaCarregamento = document.getElementById('areaCarregamento');
-        const botaoAdmin = document.getElementById('botaoAdmin');
-        const modalSenha = document.getElementById('modalSenha');
-        const campoSenha = document.getElementById('campoSenha');
-        const avisoErro = document.getElementById('avisoErro');
-        const btnCancelar = document.getElementById('btnCancelar');
-        const btnEntrar = document.getElementById('btnEntrar');
-
-        // ✅ FUNÇÕES AUXILIARES
-        function carregando(estado) { 
-            areaCarregamento.classList.toggle('escondido', !estado); 
-        }
-        function formatarData() { 
-            return new Date().toLocaleString('pt-BR'); 
+        // FUNÇÃO DATA
+        function dataAtual() {
+            return new Date().toLocaleString('pt-BR');
         }
 
-        // ✅ SALVAR PARTICIPANTE — CORRIGIDO!
-        btnParticipante.onclick = async () => {
-            const nome = nomeParticipante.value.trim();
-            if (!nome) { 
-                alert("⚠️ Digite seu nome!"); 
-                return; 
-            }
-            
-            carregando(true);
+        // ✅ SALVAR PARTICIPANTE
+        async function salvarParticipante() {
+            const nome = document.getElementById('nomeParticipante').value.trim();
+            if (!nome) { alert("⚠️ Digite seu nome!"); return; }
+
             try {
-                await push(participantesRef, { 
-                    nome: nome, 
-                    data: formatarData() 
+                await firebase.push(firebase.ref(db, "festival_pipas/participantes"), {
+                    nome: nome,
+                    data: dataAtual()
                 });
-                nomeParticipante.value = '';
-                alert("✅ Obrigado! Você está participando! 🪁");
-            } catch (erro) {
-                alert("❌ Erro ao salvar: " + erro.message);
+                document.getElementById('nomeParticipante').value = '';
+                alert("✅ Obrigado! Inscrição feita! 🪁");
+            } catch (e) {
+                alert("❌ Erro: " + e.message);
             }
-            carregando(false);
-        };
+        }
 
-        // ✅ SALVAR APOIADOR / PATROCINADOR — CORRIGIDO!
-        btnPatrocinador.onclick = async () => {
-            const nome = nomePatrocinador.value.trim();
-            const desc = descricaoApoio.value.trim();
+        // ✅ SALVAR APOIADOR
+        async function salvarApoiador() {
+            const nome = document.getElementById('nomeApoiador').value.trim();
+            const oferta = document.getElementById('ofertaApoio').value.trim();
+            if (!nome) { alert("⚠️ Digite seu nome!"); return; }
+            if (!oferta) { alert("⚠️ Digite o que você oferece!"); return; }
 
-            if (!nome) { 
-                alert("⚠️ Digite seu nome!"); 
-                return; 
-            }
-            if (!desc) { 
-                alert("⚠️ Descreva o que você pode oferecer!"); 
-                return; 
-            }
-            
-            carregando(true);
             try {
-                await push(apoiadoresRef, { 
-                    nome: nome, 
-                    descricao: desc, 
-                    data: formatarData() 
+                await firebase.push(firebase.ref(db, "festival_pipas/apoiadores"), {
+                    nome: nome,
+                    oferta: oferta,
+                    data: dataAtual()
                 });
-                nomePatrocinador.value = '';
-                descricaoApoio.value = '';
-                alert("✅ Agradecemos seu apoio! ⭐");
-            } catch (erro) {
-                alert("❌ Erro ao salvar: " + erro.message);
+                document.getElementById('nomeApoiador').value = '';
+                document.getElementById('ofertaApoio').value = '';
+                alert("✅ Agradecemos o apoio! ⭐");
+            } catch (e) {
+                alert("❌ Erro: " + e.message);
             }
-            carregando(false);
-        };
+        }
 
-        // ✅ CARREGAR PARTICIPANTES EM TEMPO REAL
-        onValue(participantesRef, (snap) => {
-            listaParticipantesEl.innerHTML = '';
-            const itens = [];
-            snap.forEach(i => itens.push({id:i.key, ...i.val()}));
-            qtdParticipantes.textContent = itens.length;
+        // ✅ CARREGAR PARTICIPANTES
+        firebase.onValue(firebase.ref(db, "festival_pipas/participantes"), (snap) => {
+            const lista = document.getElementById('listaParticipantes');
+            const qtd = document.getElementById('qtdParticipantes');
+            lista.innerHTML = '';
+            let contador = 0;
 
-            if (itens.length === 0) {
-                listaParticipantesEl.innerHTML = '<p class="text-gray-400 text-center py-6">Nenhum participante ainda. Seja o primeiro! 🪁</p>';
-                return;
-            }
-            itens.forEach(p => {
-                const div = document.createElement('div');
-                div.className = 'p-3 bg-green-50 rounded-lg flex justify-between items-center';
-                div.innerHTML = `
-                    <div>
-                        <p class="font-medium text-green-900">🪁 ${p.nome}</p>
-                        <p class="text-xs text-gray-500">${p.data}</p>
+            snap.forEach((item) => {
+                const dados = item.val();
+                contador++;
+                lista.innerHTML += `
+                    <div class="p-3 bg-green-50 rounded-lg">
+                        <p class="font-medium text-green-900">🪁 ${dados.nome}</p>
+                        <p class="text-xs text-gray-500">${dados.data}</p>
                     </div>
                 `;
-                if (acessoAdmin) {
-                    const btn = document.createElement('button');
-                    btn.className = 'text-red-500 text-sm';
-                    btn.innerHTML = '<i class="fa fa-trash"></i>';
-                    btn.onclick = () => remover(p.id, 'participante');
-                    div.appendChild(btn);
-                }
-                listaParticipantesEl.appendChild(div);
             });
+
+            qtd.textContent = contador;
+            if (contador === 0) {
+                lista.innerHTML = '<p class="text-gray-400 text-center py-6">Nenhum participante ainda 🪁</p>';
+            }
         });
 
-        // ✅ CARREGAR APOIADORES EM TEMPO REAL
-        onValue(apoiadoresRef, (snap) => {
-            listaPatrocinadoresEl.innerHTML = '';
-            const itens = [];
-            snap.forEach(i => itens.push({id:i.key, ...i.val()}));
-            qtdPatrocinadores.textContent = itens.length;
+        // ✅ CARREGAR APOIADORES
+        firebase.onValue(firebase.ref(db, "festival_pipas/apoiadores"), (snap) => {
+            const lista = document.getElementById('listaApoiadores');
+            const qtd = document.getElementById('qtdApoiadores');
+            lista.innerHTML = '';
+            let contador = 0;
 
-            if (itens.length === 0) {
-                listaPatrocinadoresEl.innerHTML = '<p class="text-gray-400 text-center py-6">Nenhum apoiador ainda. Seja o primeiro! ⭐</p>';
-                return;
-            }
-            itens.forEach(p => {
-                const div = document.createElement('div');
-                div.className = 'p-3 bg-amber-50 rounded-lg flex justify-between items-start';
-                div.innerHTML = `
-                    <div>
-                        <p class="font-medium text-amber-900">⭐ ${p.nome}</p>
-                        ${p.descricao ? `<p class="text-sm text-gray-600">Apoio: ${p.descricao}</p>` : ''}
-                        <p class="text-xs text-gray-400 mt-1">${p.data}</p>
+            snap.forEach((item) => {
+                const dados = item.val();
+                contador++;
+                lista.innerHTML += `
+                    <div class="p-3 bg-amber-50 rounded-lg">
+                        <p class="font-medium text-amber-900">⭐ ${dados.nome}</p>
+                        <p class="text-sm text-amber-700">Apoio: ${dados.oferta || '-'}</p>
+                        <p class="text-xs text-gray-500">${dados.data}</p>
                     </div>
                 `;
-                if (acessoAdmin) {
-                    const btn = document.createElement('button');
-                    btn.className = 'text-red-500 text-sm';
-                    btn.innerHTML = '<i class="fa fa-trash"></i>';
-                    btn.onclick = () => remover(p.id, 'apoiador');
-                    div.appendChild(btn);
-                }
-                listaPatrocinadoresEl.appendChild(div);
             });
-        });
 
-        // ✅ REMOVER REGISTRO
-        async function remover(id, tipo) {
-            if (!confirm("⚠️ Excluir este registro? Não tem como desfazer!")) return;
-            const caminho = tipo === 'participante' ? 'festival_pipas/participantes/' : 'festival_pipas/apoiadores/';
-            await remove(ref(db, caminho + id));
-            alert("✅ Excluído!");
-        }
-
-        // ✅ LOGIN ADMINISTRATIVO
-        botaoAdmin.onclick = () => { 
-            modalSenha.classList.remove('escondido'); 
-            campoSenha.value = ''; 
-            avisoErro.classList.add('escondido'); 
-        };
-        btnCancelar.onclick = () => modalSenha.classList.add('escondido');
-        btnEntrar.onclick = () => {
-            if (campoSenha.value.trim() === SENHA_ADMIN) {
-                acessoAdmin = true;
-                modalSenha.classList.add('escondido');
-                alert("🔓 Acesso liberado! Você pode excluir registros.");
-            } else {
-                avisoErro.classList.remove('escondido');
-                campoSenha.value = '';
+            qtd.textContent = contador;
+            if (contador === 0) {
+                lista.innerHTML = '<p class="text-gray-400 text-center py-6">Nenhum apoiador ainda ⭐</p>';
             }
-        };
+        });
     </script>
 </body>
 </html>
