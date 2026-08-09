@@ -94,7 +94,12 @@
             <div class="bg-white rounded-2xl sombra-card p-6">
                 <h2 class="text-lg font-bold text-sky-800 mb-4 flex items-center justify-between">
                     <span><i class="fa fa-users text-primario mr-2"></i> Participantes</span>
-                    <span id="qtdParticipantes" class="bg-sky-100 text-sky-800 px-3 py-1 rounded-full text-sm">0</span>
+                    <div class="flex items-center gap-2">
+                        <span id="qtdParticipantes" class="bg-sky-100 text-sky-800 px-3 py-1 rounded-full text-sm">0</span>
+                        <button id="btnLimparParticipantes" onclick="limparTodosParticipantes()" class="escondido text-red-500 text-xs font-medium hover:text-red-700">
+                            🗑️ Apagar Tudo
+                        </button>
+                    </div>
                 </h2>
                 <div id="listaParticipantes" class="space-y-2 max-h-80 overflow-y-auto pr-2">
                     <p class="text-gray-400 text-center py-6">Nenhum participante ainda 🪁</p>
@@ -104,7 +109,12 @@
             <div class="bg-white rounded-2xl sombra-card p-6">
                 <h2 class="text-lg font-bold text-amber-700 mb-4 flex items-center justify-between">
                     <span><i class="fa fa-heart text-patrocinador mr-2"></i> Apoiadores</span>
-                    <span id="qtdApoiadores" class="bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-sm">0</span>
+                    <div class="flex items-center gap-2">
+                        <span id="qtdApoiadores" class="bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-sm">0</span>
+                        <button id="btnLimparApoiadores" onclick="limparTodosApoiadores()" class="escondido text-red-500 text-xs font-medium hover:text-red-700">
+                            🗑️ Apagar Tudo
+                        </button>
+                    </div>
                 </h2>
                 <div id="listaApoiadores" class="space-y-2 max-h-80 overflow-y-auto pr-2">
                     <p class="text-gray-400 text-center py-6">Nenhum apoiador ainda ⭐</p>
@@ -114,7 +124,7 @@
 
         <!-- 🔐 ÁREA ADMINISTRATIVA -->
         <div class="text-center mt-10">
-            <button onclick="abrirModalSenha()" class="text-gray-400 text-sm hover:text-admin transition">
+            <button onclick="abrirModalSenha()" class="text-gray-500 text-sm hover:text-admin transition">
                 🔐 Área Administrativa
             </button>
         </div>
@@ -200,86 +210,110 @@
             }
         }
 
-        // ✅ EXCLUIR PARTICIPANTE
+        // ✅ EXCLUIR UM PARTICIPANTE
         async function excluirParticipante(chave) {
             if (!confirm("⚠️ Tem certeza que deseja excluir este participante?")) return;
             await db.ref("festival_pipas/participantes/" + chave).remove();
             alert("✅ Excluído com sucesso!");
         }
 
-        // ✅ EXCLUIR APOIADOR
+        // ✅ EXCLUIR UM APOIADOR
         async function excluirApoiador(chave) {
             if (!confirm("⚠️ Tem certeza que deseja excluir este apoiador?")) return;
             await db.ref("festival_pipas/apoiadores/" + chave).remove();
             alert("✅ Excluído com sucesso!");
         }
 
+        // ✅ APAGAR TODOS OS PARTICIPANTES
+        async function limparTodosParticipantes() {
+            if (!confirm("⚠️⚠️⚠️ TEM CERTEZA? Isso vai APAGAR TODOS os participantes de uma vez! Não tem volta!")) return;
+            await db.ref("festival_pipas/participantes").remove();
+            alert("✅ Todos os participantes foram apagados!");
+        }
+
+        // ✅ APAGAR TODOS OS APOIADORES
+        async function limparTodosApoiadores() {
+            if (!confirm("⚠️⚠️⚠️ TEM CERTEZA? Isso vai APAGAR TODOS os apoiadores de uma vez! Não tem volta!")) return;
+            await db.ref("festival_pipas/apoiadores").remove();
+            alert("✅ Todos os apoiadores foram apagados!");
+        }
+
         // ✅ CARREGAR PARTICIPANTES
-        db.ref("festival_pipas/participantes").on("value", (snap) => {
-            const lista = document.getElementById('listaParticipantes');
-            const qtd = document.getElementById('qtdParticipantes');
-            lista.innerHTML = '';
-            let contador = 0;
+        function carregarParticipantes() {
+            db.ref("festival_pipas/participantes").on("value", (snap) => {
+                const lista = document.getElementById('listaParticipantes');
+                const qtd = document.getElementById('qtdParticipantes');
+                lista.innerHTML = '';
+                let contador = 0;
 
-            snap.forEach((item) => {
-                const dados = item.val();
-                const chave = item.key;
-                contador++;
+                snap.forEach((item) => {
+                    const dados = item.val();
+                    const chave = item.key;
+                    contador++;
 
-                const botoesExcluir = acessoLiberado 
-                    ? `<button onclick="excluirParticipante('${chave}')" class="text-red-500 text-sm ml-2" title="Excluir"><i class="fa fa-trash"></i></button>` 
-                    : '';
+                    // Só mostra a lixeira se estiver logado como admin
+                    const botaoExcluir = acessoLiberado 
+                        ? `<button onclick="excluirParticipante('${chave}')" class="text-red-500 ml-3 flex-shrink-0" title="Excluir">
+                            <i class="fa fa-trash"></i>
+                           </button>` 
+                        : '';
 
-                lista.innerHTML += `
-                    <div class="p-3 bg-green-50 rounded-lg mb-2 flex justify-between items-center">
-                        <div>
-                            <p class="font-medium text-green-900">🪁 ${dados.nome}</p>
-                            <p class="text-xs text-gray-500">${dados.data}</p>
+                    lista.innerHTML += `
+                        <div class="p-3 bg-green-50 rounded-lg mb-2 flex justify-between items-center">
+                            <div>
+                                <p class="font-medium text-green-900">🪁 ${dados.nome}</p>
+                                <p class="text-xs text-gray-500">${dados.data}</p>
+                            </div>
+                            ${botaoExcluir}
                         </div>
-                        ${botoesExcluir}
-                    </div>
-                `;
-            });
+                    `;
+                });
 
-            qtd.textContent = contador;
-            if (contador === 0) {
-                lista.innerHTML = '<p class="text-gray-400 text-center py-6">Nenhum participante ainda 🪁</p>';
-            }
-        });
+                qtd.textContent = contador;
+                if (contador === 0) {
+                    lista.innerHTML = '<p class="text-gray-400 text-center py-6">Nenhum participante ainda 🪁</p>';
+                }
+            });
+        }
 
         // ✅ CARREGAR APOIADORES
-        db.ref("festival_pipas/apoiadores").on("value", (snap) => {
-            const lista = document.getElementById('listaApoiadores');
-            const qtd = document.getElementById('qtdApoiadores');
-            lista.innerHTML = '';
-            let contador = 0;
+        function carregarApoiadores() {
+            db.ref("festival_pipas/apoiadores").on("value", (snap) => {
+                const lista = document.getElementById('listaApoiadores');
+                const qtd = document.getElementById('qtdApoiadores');
+                lista.innerHTML = '';
+                let contador = 0;
 
-            snap.forEach((item) => {
-                const dados = item.val();
-                const chave = item.key;
-                contador++;
+                snap.forEach((item) => {
+                    const dados = item.val();
+                    const chave = item.key;
+                    contador++;
 
-                const botoesExcluir = acessoLiberado 
-                    ? `<button onclick="excluirApoiador('${chave}')" class="text-red-500 text-sm ml-2" title="Excluir"><i class="fa fa-trash"></i></button>` 
-                    : '';
+                    // Só mostra a lixeira se estiver logado como admin
+                    const botaoExcluir = acessoLiberado 
+                        ? `<button onclick="excluirApoiador('${chave}')" class="text-red-500 ml-3 flex-shrink-0" title="Excluir">
+                            <i class="fa fa-trash"></i>
+                           </button>` 
+                        : '';
 
-                lista.innerHTML += `
-                    <div class="p-3 bg-amber-50 rounded-lg mb-2 flex justify-between items-start">
-                        <div>
-                            <p class="font-medium text-amber-900">⭐ ${dados.nome}</p>
-                            <p class="text-sm text-amber-700">Apoio: ${dados.oferta || '-'}</p>
-                            <p class="text-xs text-gray-500">${dados.data}</p>
+                    lista.innerHTML += `
+                        <div class="p-3 bg-amber-50 rounded-lg mb-2 flex justify-between items-start">
+                            <div>
+                                <p class="font-medium text-amber-900">⭐ ${dados.nome}</p>
+                                <p class="text-sm text-amber-700">Apoio: ${dados.oferta || '-'}</p>
+                                <p class="text-xs text-gray-500">${dados.data}</p>
+                            </div>
+                            ${botaoExcluir}
                         </div>
-                        ${botoesExcluir}
-                    </div>
-                `;
-            });
+                    `;
+                });
 
-            qtd.textContent = contador;
-            if (contador === 0) {
-                lista.innerHTML = '<p class="text-gray-400 text-center py-6">Nenhum apoiador ainda ⭐</p>';
-            }
-        });
+                qtd.textContent = contador;
+                if (contador === 0) {
+                    lista.innerHTML = '<p class="text-gray-400 text-center py-6">Nenhum apoiador ainda ⭐</p>';
+                }
+            });
+        }
 
         // 🔐 FUNÇÕES DA ÁREA ADMINISTRATIVA
         function abrirModalSenha() {
@@ -297,12 +331,25 @@
             if (senhaDigitada === SENHA_ADMIN) {
                 acessoLiberado = true;
                 fecharModalSenha();
-                alert("🔓 Acesso liberado! Agora você pode excluir registros.");
+
+                // ✅ MOSTRA OS BOTÕES DE APAGAR TUDO
+                document.getElementById('btnLimparParticipantes').classList.remove('escondido');
+                document.getElementById('btnLimparApoiadores').classList.remove('escondido');
+
+                // ✅ RECARREGA A LISTA PARA APARECER AS LIXEIRAS
+                carregarParticipantes();
+                carregarApoiadores();
+
+                alert("🔓 Acesso liberado! Agora aparecem as lixeiras e o botão 'Apagar Tudo'!");
             } else {
                 document.getElementById('avisoErro').classList.remove('escondido');
                 document.getElementById('campoSenha').value = '';
             }
         }
+
+        // 🔄 CARREGA TUDO QUANDO A PÁGINA ABRIR
+        carregarParticipantes();
+        carregarApoiadores();
     </script>
 </body>
 </html>
