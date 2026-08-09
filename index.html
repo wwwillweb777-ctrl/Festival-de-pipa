@@ -14,7 +14,6 @@
                         primario: '#0284c7',
                         participante: '#10B981',
                         patrocinador: '#F59E0B',
-                        admin: '#7C3AED',
                     }
                 }
             }
@@ -22,7 +21,6 @@
     </script>
     <style>
         .sombra-card { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
-        .escondido { display: none !important; }
     </style>
 </head>
 <body class="bg-sky-50 min-h-screen font-sans">
@@ -113,9 +111,9 @@
         </div>
     </main>
 
-    <!-- FIREBASE -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js"></script>
+    <!-- ✅ FIREBASE CARREGADO CORRETAMENTE -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
     <script>
         // INICIA FIREBASE
@@ -129,8 +127,8 @@
             appId: "1:66370500400:web:42d6569ca2c8172ddf3af5"
         };
 
-        const app = firebase.initializeApp(firebaseConfig);
-        const db = firebase.getDatabase(app);
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
         // FUNÇÃO DATA
         function dataAtual() {
@@ -143,7 +141,7 @@
             if (!nome) { alert("⚠️ Digite seu nome!"); return; }
 
             try {
-                await firebase.push(firebase.ref(db, "festival_pipas/participantes"), {
+                await db.ref("festival_pipas/participantes").push({
                     nome: nome,
                     data: dataAtual()
                 });
@@ -162,7 +160,7 @@
             if (!oferta) { alert("⚠️ Digite o que você oferece!"); return; }
 
             try {
-                await firebase.push(firebase.ref(db, "festival_pipas/apoiadores"), {
+                await db.ref("festival_pipas/apoiadores").push({
                     nome: nome,
                     oferta: oferta,
                     data: dataAtual()
@@ -176,7 +174,7 @@
         }
 
         // ✅ CARREGAR PARTICIPANTES
-        firebase.onValue(firebase.ref(db, "festival_pipas/participantes"), (snap) => {
+        db.ref("festival_pipas/participantes").on("value", (snap) => {
             const lista = document.getElementById('listaParticipantes');
             const qtd = document.getElementById('qtdParticipantes');
             lista.innerHTML = '';
@@ -186,7 +184,7 @@
                 const dados = item.val();
                 contador++;
                 lista.innerHTML += `
-                    <div class="p-3 bg-green-50 rounded-lg">
+                    <div class="p-3 bg-green-50 rounded-lg mb-2">
                         <p class="font-medium text-green-900">🪁 ${dados.nome}</p>
                         <p class="text-xs text-gray-500">${dados.data}</p>
                     </div>
@@ -200,7 +198,7 @@
         });
 
         // ✅ CARREGAR APOIADORES
-        firebase.onValue(firebase.ref(db, "festival_pipas/apoiadores"), (snap) => {
+        db.ref("festival_pipas/apoiadores").on("value", (snap) => {
             const lista = document.getElementById('listaApoiadores');
             const qtd = document.getElementById('qtdApoiadores');
             lista.innerHTML = '';
@@ -210,7 +208,7 @@
                 const dados = item.val();
                 contador++;
                 lista.innerHTML += `
-                    <div class="p-3 bg-amber-50 rounded-lg">
+                    <div class="p-3 bg-amber-50 rounded-lg mb-2">
                         <p class="font-medium text-amber-900">⭐ ${dados.nome}</p>
                         <p class="text-sm text-amber-700">Apoio: ${dados.oferta || '-'}</p>
                         <p class="text-xs text-gray-500">${dados.data}</p>
