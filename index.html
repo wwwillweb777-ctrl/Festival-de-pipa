@@ -101,11 +101,6 @@
                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-patrocinador/30 focus:border-patrocinador outline-none">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Valor da Apoio (R$) — opcional</label>
-                        <input type="text" id="valorPatrocinio" placeholder="Ex: 50,00 | 100,00"
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-patrocinador/30 focus:border-patrocinador outline-none">
-                    </div>
-                    <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">O que você oferece</label>
                         <textarea id="descricaoApoio" rows="3" placeholder="Ex: doação de pipas, linha, materiais, serviços, transporte..."
                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-patrocinador/30 focus:border-patrocinador outline-none resize-none"></textarea>
@@ -131,7 +126,7 @@
                 </div>
             </div>
 
-            <!-- LISTA DE PATROCINADORES / APOIADORES -->
+            <!-- LISTA DE APOIADORES / PATROCINADORES -->
             <div class="bg-white rounded-2xl sombra-card p-6">
                 <h2 class="text-lg font-bold text-amber-700 mb-4 flex items-center justify-between">
                     <span><i class="fa fa-hand-heart text-patrocinador mr-2"></i> Apoiadores / Patrocinadores</span>
@@ -190,13 +185,11 @@
         // ✅ CONFIGURAÇÕES
         const SENHA_ADMIN = "WJ321";
         let acessoAdmin = false;
-        let salvando = false;
 
         // ✅ ELEMENTOS
         const nomeParticipante = document.getElementById('nomeParticipante');
         const btnParticipante = document.getElementById('btnParticipante');
         const nomePatrocinador = document.getElementById('nomePatrocinador');
-        const valorPatrocinio = document.getElementById('valorPatrocinio');
         const descricaoApoio = document.getElementById('descricaoApoio');
         const btnPatrocinador = document.getElementById('btnPatrocinador');
         const listaParticipantesEl = document.getElementById('listaParticipantes');
@@ -212,45 +205,63 @@
         const btnEntrar = document.getElementById('btnEntrar');
 
         // ✅ FUNÇÕES AUXILIARES
-        function carregando(estado) { areaCarregamento.classList.toggle('escondido', !estado); }
-        function formatarData() { return new Date().toLocaleString('pt-BR'); }
-        function formatarValor(texto) { return texto ? texto.replace(/\./g,'').replace(',','.') : ''; }
+        function carregando(estado) { 
+            areaCarregamento.classList.toggle('escondido', !estado); 
+        }
+        function formatarData() { 
+            return new Date().toLocaleString('pt-BR'); 
+        }
 
-        // ✅ SALVAR PARTICIPANTE
+        // ✅ SALVAR PARTICIPANTE — CORRIGIDO!
         btnParticipante.onclick = async () => {
             const nome = nomeParticipante.value.trim();
-            if (!nome) { alert("⚠️ Digite seu nome!"); return; }
-            if (salvando) return; salvando = true; carregando(true);
-
-            await push(participantesRef, { nome: nome, data: formatarData() });
-            nomeParticipante.value = '';
-            alert("✅ Obrigado! Você está participando! 🪁");
-            carregando(false); salvando = false;
+            if (!nome) { 
+                alert("⚠️ Digite seu nome!"); 
+                return; 
+            }
+            
+            carregando(true);
+            try {
+                await push(participantesRef, { 
+                    nome: nome, 
+                    data: formatarData() 
+                });
+                nomeParticipante.value = '';
+                alert("✅ Obrigado! Você está participando! 🪁");
+            } catch (erro) {
+                alert("❌ Erro ao salvar: " + erro.message);
+            }
+            carregando(false);
         };
 
-        // ✅ SALVAR APOIADOR / PATROCINADOR
+        // ✅ SALVAR APOIADOR / PATROCINADOR — CORRIGIDO!
         btnPatrocinador.onclick = async () => {
             const nome = nomePatrocinador.value.trim();
-            const valorTxt = valorPatrocinio.value.trim();
             const desc = descricaoApoio.value.trim();
 
-            if (!nome) { alert("⚠️ Digite seu nome!"); return; }
-            if (!valorTxt && !desc) { alert("⚠️ Informe um valor ou o que você pode oferecer!"); return; }
-            if (salvando) return; salvando = true; carregando(true);
-
-            const valor = valorTxt ? parseFloat(formatarValor(valorTxt)) : null;
-            await push(apoiadoresRef, { 
-                nome: nome, 
-                valor: valor, 
-                descricao: desc, 
-                data: formatarData() 
-            });
-
-            nomePatrocinador.value = '';
-            valorPatrocinio.value = '';
-            descricaoApoio.value = '';
-            alert("✅ Agradecemos seu apoio! ⭐");
-            carregando(false); salvando = false;
+            if (!nome) { 
+                alert("⚠️ Digite seu nome!"); 
+                return; 
+            }
+            if (!desc) { 
+                alert("⚠️ Descreva o que você pode oferecer!"); 
+                return; 
+            }
+            
+            carregando(true);
+            try {
+                await push(apoiadoresRef, { 
+                    nome: nome, 
+                    descricao: desc, 
+                    data: formatarData() 
+                });
+                nomePatrocinador.value = '';
+                descricaoApoio.value = '';
+                alert("✅ Agradecemos seu apoio! ⭐");
+            } catch (erro) {
+                alert("❌ Erro ao salvar: " + erro.message);
+            }
+            carregando(false);
         };
 
         // ✅ CARREGAR PARTICIPANTES EM TEMPO REAL
@@ -298,11 +309,9 @@
             itens.forEach(p => {
                 const div = document.createElement('div');
                 div.className = 'p-3 bg-amber-50 rounded-lg flex justify-between items-start';
-                let valorTexto = p.valor ? `R$ ${Number(p.valor).toFixed(2).replace('.',',')}` : '';
                 div.innerHTML = `
                     <div>
                         <p class="font-medium text-amber-900">⭐ ${p.nome}</p>
-                        ${valorTexto ? `<p class="text-sm text-amber-700">Valor: ${valorTexto}</p>` : ''}
                         ${p.descricao ? `<p class="text-sm text-gray-600">Apoio: ${p.descricao}</p>` : ''}
                         <p class="text-xs text-gray-400 mt-1">${p.data}</p>
                     </div>
@@ -327,7 +336,11 @@
         }
 
         // ✅ LOGIN ADMINISTRATIVO
-        botaoAdmin.onclick = () => { modalSenha.classList.remove('escondido'); campoSenha.value = ''; avisoErro.classList.add('escondido'); };
+        botaoAdmin.onclick = () => { 
+            modalSenha.classList.remove('escondido'); 
+            campoSenha.value = ''; 
+            avisoErro.classList.add('escondido'); 
+        };
         btnCancelar.onclick = () => modalSenha.classList.add('escondido');
         btnEntrar.onclick = () => {
             if (campoSenha.value.trim() === SENHA_ADMIN) {
