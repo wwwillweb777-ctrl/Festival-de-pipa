@@ -67,13 +67,18 @@ async function enviarResposta() {
     if (!idDest) { alert("❌ Destinatário não identificado!"); return; }
     try {
         if (chave) {
-            await db.ref("festival_pipas/mensagens/" + chave).update({ resposta: texto, dataResposta: dataAtual() });
+            await db.ref("festival_pipas/mensagens/" + chave).update({
+                resposta: texto, dataResposta: dataAtual()
+            });
             alert("✅ Resposta enviada para " + nomeDest + "!");
         } else {
             await db.ref("festival_pipas/mensagens").push({
-                idRemetente: idDest, nomeRemetente: nomeDest,
-                texto: "📩 Resposta de: " + NOME_REMETENTE_ADMIN + "\n" + texto,
-                data: dataAtual(), resposta: texto, dataResposta: dataAtual()
+                idRemetente: idDest,
+                nomeRemetente: nomeDest,
+                texto: "📩 Mensagem de: " + NOME_REMETENTE_ADMIN + "\n" + texto,
+                data: dataAtual(),
+                resposta: texto,
+                dataResposta: dataAtual()
             });
             alert("✅ Mensagem enviada para " + nomeDest + "!");
         }
@@ -91,22 +96,70 @@ async function limparTodasMensagens() {
     alert("✅ Todas apagadas!");
 }
 function carregarTodasMensagensAdmin() {
-    db.ref("festival_pipas/mensagens").on("value", snap => {
+    db.ref("festival_pipas/mensagens").on("value", (snap) => {
         if (!document.getElementById('painel-mensagens-admin')) {
             const container = document.createElement('div');
             container.id = 'painel-mensagens-admin';
             container.className = 'mt-8 bg-white rounded-2xl sombra-card p-6';
-            container.innerHTML = `<div class="flex justify-between items-center mb-4"><h2 class="text-lg font-bold text-admin flex items-center gap-2"><i class="fa fa-comments"></i> Mensagens Recebidas</h2><button onclick="limparTodasMensagens()" class="bg-red-500 hover:bg-red-600 text-white text-sm px-4 py-2 rounded-lg font-medium">🗑️ Apagar Todas</button></div><div id="lista-mensagens-admin" class="space-y-4 max-h-[600px] overflow-y-auto"></div>`;
+            container.innerHTML = `
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-bold text-admin flex items-center gap-2">
+                        <i class="fa fa-comments"></i> Mensagens Recebidas
+                    </h2>
+                    <button onclick="limparTodasMensagens()" class="bg-red-500 hover:bg-red-600 text-white text-sm px-4 py-2 rounded-lg font-medium">
+                        🗑️ Apagar Todas
+                    </button>
+                </div>
+                <div id="lista-mensagens-admin" class="space-y-4 max-h-[600px] overflow-y-auto"></div>
+            `;
             document.querySelector('main').appendChild(container);
         }
         const lista = document.getElementById('lista-mensagens-admin');
-        lista.innerHTML = ''; let tem = false;
-        snap.forEach(item => {
-            tem = true; const chave = item.key; const d = item.val();
-            const nomePessoa = d.nomeRemetente || "Visitante";
-            const status = d.resposta ? '<span class="text-green-600 text-sm font-medium">✅ Respondida</span>' : '<span class="text-red-500 text-sm font-bold">⏳ Pendente</span>';
-            lista.innerHTML += `<div class="p-4 border rounded-xl ${d.resposta?'bg-green-50 border-green-200':'bg-yellow-50 border-yellow-200'}"><div class="flex justify-between items-start mb-2"><span class="font-bold text-lg">📩 Mensagem de ${nomePessoa}</span>${status}</div><p class="text-gray-800 mb-2">${d.texto}</p><p class="text-sm text-gray-500 mb-3">📅 ${d.data}</p>${d.resposta?`<div class="bg-green-100 p-3 rounded-lg mb-3"><p class="text-sm font-semibold text-green-800 mb-1">📩 Sua Resposta:</p><p class="text-green-900">${d.resposta}</p>${d.dataResposta?`<p class="text-xs text-green-600 mt-1">${d.dataResposta}</p>`:""}</div>`:""}<div class="flex gap-2"><button onclick='abrirModalResponderMensagem("${chave}", ${JSON.stringify(d).replace(/'/g,"\\'")})' class="px-4 py-2 rounded-lg text-white font-medium bg-admin">${d.resposta?'✏️ Editar Resposta':'✍️ Responder'}</button><button onclick="excluirMensagem('${chave}')" class="px-4 py-2 rounded-lg bg-red-500 text-white font-medium">🗑️ Excluir</button></div></div>`;
+        lista.innerHTML = '';
+        let temMensagem = false;
+        snap.forEach((item) => {
+            temMensagem = true;
+            const chave = item.key;
+            const dados = item.val();
+            const nomePessoa = dados.nomeRemetente || "Visitante";
+            const idPessoa = dados.idRemetente || "";
+            const status = dados.resposta
+                ? '<span class="text-green-600 text-sm font-medium">✅ Respondida</span>'
+                : '<span class="text-red-500 text-sm font-bold">⏳ Pendente</span>';
+            lista.innerHTML += `
+                <div class="p-4 border rounded-xl ${dados.resposta ? 'bg-green-50 border-green-200' : 'bg-yellow-50 border-yellow-200'}">
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="font-bold text-lg">📩 Mensagem de ${nomePessoa}</span>
+                        ${status}
+                    </div>
+                    <p class="text-gray-800 mb-2">${dados.texto}</p>
+                    <p class="text-sm text-gray-500 mb-3">📅 ${dados.data}</p>
+                    ${dados.resposta ? `
+                        <div class="bg-green-100 p-3 rounded-lg mb-3">
+                            <p class="text-sm font-semibold text-green-800 mb-1">📩 Sua Resposta:</p>
+                            <p class="text-green-900">${dados.resposta}</p>
+                            ${dados.dataResposta ? `<p class="text-xs text-green-600 mt-1">${dados.dataResposta}</p>` : ''}
+                        </div>
+                    ` : ''}
+                    <div class="flex flex-wrap gap-2 mt-2">
+                        <button onclick='abrirModalResponderMensagem("${chave}", ${JSON.stringify(dados).replace(/'/g, "\\'")})' 
+                            class="px-3 py-2 rounded-lg text-white text-sm font-medium bg-admin">
+                            ${dados.resposta ? '✏️ Editar Resposta' : '✍️ Responder'}
+                        </button>
+                        <button onclick='abrirModalMensagemNova("${idPessoa}", "${nomePessoa.replace(/"/g, '&quot;')}")' 
+                            class="px-3 py-2 rounded-lg text-white text-sm font-medium bg-primario">
+                            ✉️ Mensagem Nova
+                        </button>
+                        <button onclick="excluirMensagem('${chave}')" 
+                            class="px-3 py-2 rounded-lg bg-red-500 text-white text-sm font-medium">
+                            🗑️ Excluir
+                        </button>
+                    </div>
+                </div>
+            `;
         });
-        if (!tem) lista.innerHTML = '<p class="text-gray-400 text-center py-8">Nenhuma mensagem recebida ainda 💬</p>';
+        if (!temMensagem) {
+            lista.innerHTML = '<p class="text-gray-400 text-center py-8">Nenhuma mensagem recebida ainda 💬</p>';
+        }
     });
 }
