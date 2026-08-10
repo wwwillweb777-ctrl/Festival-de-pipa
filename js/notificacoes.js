@@ -1,18 +1,26 @@
+// ✅ COMEÇA COM TUDO LIGADO — VOCÊ RECEBE TUDO POR PADRÃO!
 let notifConfig = JSON.parse(localStorage.getItem("notifConfig")) || {
-    mensagem: true, resposta: true, participante: true, apoiador: true, atualizacao: true
+    mensagem: true,        // ✅ Recebe mensagens do chat
+    resposta: true,        // ✅ Recebe quando alguém responde
+    participante: true,    // ✅ Recebe quando alguém se cadastra
+    apoiador: true,        // ✅ Recebe quando alguém quer patrocinar
+    atualizacao: true      // ✅ Recebe avisos do sistema
 };
 let listaNotificacoes = JSON.parse(localStorage.getItem("notificacoes")) || [];
 
 // ==========================================
-// ✅ FUNÇÃO PRINCIPAL — ADICIONAR NOTIFICAÇÃO
+// ✅ FUNÇÃO PRINCIPAL — RESPEITA O QUE ESTÁ MARCADO
 // ==========================================
 function adicionarNotificacao(tipo, titulo, mensagem) {
     console.log("🔔 Nova notificação:", tipo, titulo, mensagem);
 
-    // Se usuário desligou esse tipo, não mostra
-    if (!notifConfig[tipo]) return;
+    // ✅ Se estiver marcado SIM → CHEGA! Se NÃO → não chega
+    if (!notifConfig[tipo]) {
+        console.log("⚠️ Tipo desativado:", tipo);
+        return;
+    }
 
-    // Monta o objeto da notificação
+    // Monta a notificação
     const notif = {
         id: Date.now(),
         tipo: tipo,
@@ -22,29 +30,22 @@ function adicionarNotificacao(tipo, titulo, mensagem) {
         data: new Date().toLocaleString('pt-BR')
     };
 
-    // Adiciona na lista e salva
+    // Salva e mostra
     listaNotificacoes.unshift(notif);
     if (listaNotificacoes.length > 30) listaNotificacoes.pop();
     localStorage.setItem("notificacoes", JSON.stringify(listaNotificacoes));
 
-    // ✅ MOSTRA NA TELA DO SITE AGORA MESMO!
     mostrarNotifNaTela(notif);
-
-    // ✅ ATUALIZA O CONTADOR DO SININHO
     atualizarContadorNotif();
 }
 
 // ==========================================
-// ✅ MOSTRA A NOTIFICAÇÃO CAINDO NA TELA
+// ✅ MOSTRA NOTIFICAÇÃO NA TELA
 // ==========================================
 function mostrarNotifNaTela(notif) {
     const caixa = document.getElementById('caixaNotificacoes');
-    if (!caixa) {
-        console.log("❌ Caixa de notificações NÃO ENCONTRADA!");
-        return;
-    }
+    if (!caixa) return;
 
-    // Cor de acordo com o tipo
     const cor = {
         mensagem: '#0284c7',
         resposta: '#10B981',
@@ -69,34 +70,21 @@ function mostrarNotifNaTela(notif) {
         <p style="font-size:13px; color:#444; margin:0 0 4px 0;">${notif.mensagem}</p>
         <p style="font-size:11px; color:#999; margin:0;">${notif.data}</p>
     `;
-
     caixa.appendChild(div);
-
-    // Some depois de 8 segundos
-    setTimeout(() => {
-        if (div.parentNode) div.remove();
-    }, 8000);
+    setTimeout(() => { if (div.parentNode) div.remove(); }, 8000);
 }
 
 // ==========================================
-// ✅ CONTADOR DO SININHO
+// ✅ CONTADOR E BOTÕES — FUNCIONAM NORMALMENTE
 // ==========================================
 function atualizarContadorNotif() {
     const naoLidas = listaNotificacoes.filter(n => !n.lida).length;
     const contador = document.getElementById('contadorNotif');
     if (contador) {
-        if (naoLidas > 0) {
-            contador.classList.remove('escondido');
-            contador.textContent = naoLidas > 9 ? '9+' : naoLidas;
-        } else {
-            contador.classList.add('escondido');
-        }
+        naoLidas > 0 ? (contador.classList.remove('escondido'), contador.textContent = naoLidas > 9 ? '9+' : naoLidas) : contador.classList.add('escondido');
     }
 }
 
-// ==========================================
-// ✅ OUTRAS FUNÇÕES
-// ==========================================
 function alternarNotif(tipo) {
     notifConfig[tipo] = !notifConfig[tipo];
     localStorage.setItem("notifConfig", JSON.stringify(notifConfig));
@@ -116,15 +104,12 @@ function atualizarBotoesNotif() {
 
 function abrirNotificacoes() {
     const modal = document.getElementById('modalNotificacoes');
-    if (modal) modal.classList.remove('escondido');
-    renderizarListaNotificacoes();
+    if (modal) { modal.classList.remove('escondido'); renderizarListaNotificacoes(); }
 }
-
 function fecharNotificacoes() {
     const modal = document.getElementById('modalNotificacoes');
     if (modal) modal.classList.add('escondido');
 }
-
 function renderizarListaNotificacoes() {
     const lista = document.getElementById('listaNotificacoes');
     if (!lista) return;
@@ -145,37 +130,23 @@ function renderizarListaNotificacoes() {
         `;
     });
 }
-
 function marcarLida(indice) {
     listaNotificacoes[indice].lida = true;
     localStorage.setItem("notificacoes", JSON.stringify(listaNotificacoes));
     renderizarListaNotificacoes();
     atualizarContadorNotif();
 }
-
 function marcarTodasLidas() {
     listaNotificacoes.forEach(n => n.lida = true);
     localStorage.setItem("notificacoes", JSON.stringify(listaNotificacoes));
     renderizarListaNotificacoes();
     atualizarContadorNotif();
 }
-
 function abrirConfiguracoesNotif() {
     const modal = document.getElementById('modalConfiguracoesNotif');
-    if (modal) {
-        modal.classList.remove('escondido');
-        atualizarBotoesNotif();
-    }
+    if (modal) { modal.classList.remove('escondido'); atualizarBotoesNotif(); }
 }
-
 function fecharConfiguracoesNotif() {
     const modal = document.getElementById('modalConfiguracoesNotif');
     if (modal) modal.classList.add('escondido');
 }
-
-// ==========================================
-// ✅ TESTE AUTOMÁTICO — VAI APARECER AGORA!
-// ==========================================
-setTimeout(() => {
-    adicionarNotificacao('atualizacao', '🔔 Sistema Atualizado!', 'As notificações já estão funcionando!');
-}, 1500);
