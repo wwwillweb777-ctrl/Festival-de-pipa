@@ -19,25 +19,28 @@
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
+/* ===== 🔔 SININHO ATUALIZADO DO JEITO QUE VOCÊ PEDIU! ===== */
 .botao-sininho {
     position: relative;
-    background: #EF4444;
-    color: white;
-    border: none;
+    background: #ffffff;          /* ✅ FUNDO BRANCO */
+    color: #FACC15;              /* ✅ SINO NA COR AMARELA */
+    border: 1px solid #000000;   /* ✅ BORDA FINA PRETA */
     width: 48px;
     height: 48px;
     border-radius: 50%;
-    font-size: 20px;
+    font-size: 22px;
     cursor: pointer;
-    box-shadow: 0 2px 8px rgba(239,68,68,0.3);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
 }
-.botao-sininho:hover { background: #dc2626; }
+.botao-sininho:hover { 
+    background: #fef9c3;         /* Fundo amareladinho ao passar o dedo */
+}
 .botao-sininho span {
     position: absolute;
     top: -5px;
     right: -5px;
-    background: white;
-    color: #EF4444;
+    background: #EF4444;
+    color: white;
     font-size: 12px;
     font-weight: bold;
     width: 20px;
