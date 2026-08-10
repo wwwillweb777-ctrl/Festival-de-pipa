@@ -240,6 +240,7 @@
     <script>
         // SENHA DE ACESSO ADMINISTRATIVO
         const SENHA_ADMIN = "WJ321";
+        const NOME_REMETENTE_ADMIN = "Programador"; // ✅ SEU NOME QUE APARECE NAS RESPOSTAS
         let acessoLiberado = false;
         let nomeUsuarioChat = "";
 
@@ -444,7 +445,7 @@
             }
         }
 
-        // ✅ CARREGA SOMENTE AS MENSAGENS DESTE USUÁRIO (PRIVACIDADE)
+        // ✅ CARREGA SOMENTE AS MENSAGENS DESTE USUÁRIO — COM NOME "Programador" NAS RESPOSTAS
         function carregarMensagensDoChat() {
             const area = document.getElementById('areaMensagens');
             
@@ -459,6 +460,7 @@
                     temMensagem = true;
                     const m = item.val();
                     
+                    // Mensagem da pessoa
                     area.innerHTML += `
                         <div class="mensagem mensagem-me px-4 py-2 mb-1">
                             <p class="font-medium text-sm">${m.nomeRemetente}</p>
@@ -466,10 +468,11 @@
                             <p class="text-xs opacity-70 mt-1">${m.data}</p>
                         </div>
                     `;
+                    // ✅ RESPOSTA APARECE COM NOME "Programador"
                     if (m.resposta) {
                         area.innerHTML += `
                             <div class="mensagem mensagem-resposta px-4 py-2 mb-1">
-                                <p class="font-semibold text-sm text-green-700 mb-1">📩 Resposta:</p>
+                                <p class="font-semibold text-sm text-green-700 mb-1">📩 Resposta de: ${NOME_REMETENTE_ADMIN}</p>
                                 <p>${m.resposta}</p>
                                 <p class="text-xs opacity-70 mt-1">${m.dataResposta || ''}</p>
                             </div>
@@ -506,7 +509,7 @@
         async function abrirModalMensagemNova(idPessoa, nomePessoa) {
             document.getElementById('tituloModalResposta').textContent = "✉️ Enviar Mensagem Nova";
             document.getElementById('remetenteMensagem').textContent = nomePessoa;
-            document.getElementById('chaveMensagemAtual').value = ""; // Sem chave = mensagem nova
+            document.getElementById('chaveMensagemAtual').value = "";
             document.getElementById('idDestinatario').value = idPessoa;
             document.getElementById('nomeDestinatario').value = nomePessoa;
             document.getElementById('textoResposta').value = "";
@@ -536,7 +539,7 @@
                     await db.ref("festival_pipas/mensagens").push({
                         idRemetente: idDest,
                         nomeRemetente: nomeDest,
-                        texto: "📩 Mensagem do administrador: " + texto,
+                        texto: "📩 Resposta de: " + NOME_REMETENTE_ADMIN + "\n" + texto,
                         data: dataAtual(),
                         resposta: texto,
                         dataResposta: dataAtual(),
@@ -588,7 +591,7 @@
                 const lista = document.getElementById('lista-mensagens-admin');
                 lista.innerHTML = '';
                 let temMensagem = false;
-                let pessoasJaVistas = {}; // Para não repetir pessoas
+                let pessoasJaVistas = {};
 
                 snap.forEach((item) => {
                     temMensagem = true;
@@ -600,7 +603,6 @@
                         ? '<span class="text-green-600 text-sm font-medium">✅ Respondida</span>' 
                         : '<span class="text-red-500 text-sm font-bold">⏳ Pendente</span>';
 
-                    // ✅ Botão de mensagem nova aparece UMA VEZ por pessoa
                     if (idPessoa && !pessoasJaVistas[idPessoa]) {
                         pessoasJaVistas[idPessoa] = true;
                         lista.innerHTML += `
@@ -689,7 +691,7 @@
 
                 document.getElementById('btnLimparParticipantes').classList.remove('escondido');
                 document.getElementById('btnLimparApoiadores').classList.remove('escondido');
-                document.getElementById('botaoEntrarArea').classList.add('escondido');
+                document.getElementById('botaoEntrarArea').classList.remove('escondido');
                 document.getElementById('botaoSairArea').classList.remove('escondido');
 
                 carregarParticipantes();
