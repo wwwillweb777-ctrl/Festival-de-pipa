@@ -186,7 +186,7 @@
                 </button>
             </div>
 
-            <!-- PASSO 2: ESCREVER MENSAGEM -->
+            <!-- PASSO 2: ESCREVER MENSAGEM → SÓ APARECE DEPOIS DE DIGITAR O NOME -->
             <div id="passoMensagem" class="p-4 border-t space-y-2 escondido">
                 <p class="text-sm text-green-600 font-medium">✅ Olá, <span id="nomeExibido"></span>! Agora escreva sua mensagem:</p>
                 <div class="flex gap-2">
@@ -200,21 +200,21 @@
         </div>
     </div>
 
-    <!-- 💬 MODAL DE RESPOSTA DO ADMINISTRADOR -->
+    <!-- 💬 MODAL DE RESPOSTA / MENSAGEM NOVA DO ADMINISTRADOR -->
     <div id="modalResposta" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 escondido">
         <div class="bg-white rounded-2xl w-full max-w-lg mx-4 p-6">
-            <h3 class="font-bold text-xl mb-4 text-admin">🔐 Responder Mensagem</h3>
-            <p class="text-sm text-gray-500 mb-2">Mensagem de:</p>
+            <h3 id="tituloModalResposta" class="font-bold text-xl mb-4 text-admin">🔐 Responder Mensagem</h3>
+            <p class="text-sm text-gray-500 mb-2">Para:</p>
             <p id="remetenteMensagem" class="font-medium text-gray-800 mb-3"></p>
-            <p class="text-sm text-gray-500 mb-2">Mensagem:</p>
-            <p id="textoMensagemRecebida" class="bg-gray-100 p-3 rounded-lg mb-4 text-gray-800"></p>
             <input type="hidden" id="chaveMensagemAtual">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Sua resposta:</label>
-            <textarea id="textoResposta" rows="3" placeholder="Escreva sua resposta aqui..."
+            <input type="hidden" id="idDestinatario">
+            <input type="hidden" id="nomeDestinatario">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Sua mensagem:</label>
+            <textarea id="textoResposta" rows="3" placeholder="Escreva sua mensagem aqui..."
                 class="w-full px-4 py-3 border rounded-lg mb-4"></textarea>
             <div class="flex gap-3">
                 <button onclick="fecharModalResposta()" class="flex-1 bg-gray-200 rounded-lg py-2">Cancelar</button>
-                <button onclick="enviarResposta()" class="flex-1 bg-admin text-white rounded-lg py-2">✅ Enviar Resposta</button>
+                <button id="botaoEnviarResposta" onclick="enviarResposta()" class="flex-1 bg-admin text-white rounded-lg py-2">✅ Enviar Mensagem</button>
             </div>
         </div>
     </div>
@@ -485,30 +485,69 @@
             });
         }
 
-        // 🔐 RESPONDER MENSAGEM
+        // 🔐 ABRIR MODAL PARA ENVIAR MENSAGEM NOVA OU RESPONDER
         function fecharModalResposta() {
             document.getElementById('modalResposta').classList.add('escondido');
+            document.getElementById('textoResposta').value = '';
         }
 
+        // ✅ RESPONDER UMA MENSAGEM EXISTENTE
         async function abrirModalResponderMensagem(chave, dados) {
-            document.getElementById('chaveMensagemAtual').value = chave;
+            document.getElementById('tituloModalResposta').textContent = "🔐 Responder Mensagem";
             document.getElementById('remetenteMensagem').textContent = dados.nomeRemetente || "Sem nome";
-            document.getElementById('textoMensagemRecebida').textContent = dados.texto;
+            document.getElementById('chaveMensagemAtual').value = chave;
+            document.getElementById('idDestinatario').value = dados.idRemetente;
+            document.getElementById('nomeDestinatario').value = dados.nomeRemetente || "Visitante";
             document.getElementById('textoResposta').value = dados.resposta || "";
             document.getElementById('modalResposta').classList.remove('escondido');
         }
 
+        // ✅ ENVIAR MENSAGEM NOVA PARA UMA PESSOA (INICIAR CONVERSA)
+        async function abrirModalMensagemNova(idPessoa, nomePessoa) {
+            document.getElementById('tituloModalResposta').textContent = "✉️ Enviar Mensagem Nova";
+            document.getElementById('remetenteMensagem').textContent = nomePessoa;
+            document.getElementById('chaveMensagemAtual').value = ""; // Sem chave = mensagem nova
+            document.getElementById('idDestinatario').value = idPessoa;
+            document.getElementById('nomeDestinatario').value = nomePessoa;
+            document.getElementById('textoResposta').value = "";
+            document.getElementById('modalResposta').classList.remove('escondido');
+        }
+
+        // ✅ SALVAR RESPOSTA OU MENSAGEM NOVA
         async function enviarResposta() {
             const chave = document.getElementById('chaveMensagemAtual').value;
-            const resposta = document.getElementById('textoResposta').value.trim();
-            if (!resposta) { alert("⚠️ Escreva uma resposta!"); return; }
+            const idDest = document.getElementById('idDestinatario').value;
+            const nomeDest = document.getElementById('nomeDestinatario').value;
+            const texto = document.getElementById('textoResposta').value.trim();
 
-            await db.ref("festival_pipas/mensagens/" + chave).update({
-                resposta: resposta,
-                dataResposta: dataAtual()
-            });
-            alert("✅ Resposta enviada!");
-            fecharModalResposta();
+            if (!texto) { alert("⚠️ Escreva sua mensagem!"); return; }
+            if (!idDest) { alert("❌ Destinatário não identificado!"); return; }
+
+            try {
+                if (chave) {
+                    // ✅ RESPONDER MENSAGEM EXISTENTE
+                    await db.ref("festival_pipas/mensagens/" + chave).update({
+                        resposta: texto,
+                        dataResposta: dataAtual()
+                    });
+                    alert("✅ Resposta enviada para " + nomeDest + "!");
+                } else {
+                    // ✅ ENVIAR MENSAGEM NOVA — INICIAR CONVERSA
+                    await db.ref("festival_pipas/mensagens").push({
+                        idRemetente: idDest,
+                        nomeRemetente: nomeDest,
+                        texto: "📩 Mensagem do administrador: " + texto,
+                        data: dataAtual(),
+                        resposta: texto,
+                        dataResposta: dataAtual(),
+                        mensagemNovaAdmin: true
+                    });
+                    alert("✅ Mensagem enviada para " + nomeDest + "!");
+                }
+                fecharModalResposta();
+            } catch (e) {
+                alert("❌ Erro: " + e.message);
+            }
         }
 
         // ✅ EXCLUIR UMA MENSAGEM
@@ -525,7 +564,7 @@
             alert("✅ Todas as mensagens foram apagadas!");
         }
 
-        // 🔐 ADMIN VÊ TODAS AS MENSAGENS — SEM FILTRO!
+        // 🔐 ADMIN VÊ TODAS AS MENSAGENS — SEM FILTRO + BOTÃO DE MENSAGEM NOVA
         function carregarTodasMensagensAdmin() {
             db.ref("festival_pipas/mensagens").on("value", (snap) => {
                 if (!document.getElementById('painel-mensagens-admin')) {
@@ -549,19 +588,38 @@
                 const lista = document.getElementById('lista-mensagens-admin');
                 lista.innerHTML = '';
                 let temMensagem = false;
+                let pessoasJaVistas = {}; // Para não repetir pessoas
 
                 snap.forEach((item) => {
                     temMensagem = true;
                     const chave = item.key;
                     const dados = item.val();
+                    const idPessoa = dados.idRemetente;
+                    const nomePessoa = dados.nomeRemetente || "Visitante";
                     const status = dados.resposta 
                         ? '<span class="text-green-600 text-sm font-medium">✅ Respondida</span>' 
                         : '<span class="text-red-500 text-sm font-bold">⏳ Pendente</span>';
 
+                    // ✅ Botão de mensagem nova aparece UMA VEZ por pessoa
+                    if (idPessoa && !pessoasJaVistas[idPessoa]) {
+                        pessoasJaVistas[idPessoa] = true;
+                        lista.innerHTML += `
+                            <div class="bg-purple-50 border border-purple-200 p-3 rounded-xl mb-2">
+                                <div class="flex justify-between items-center">
+                                    <span class="font-bold text-purple-800">👤 ${nomePessoa}</span>
+                                    <button onclick='abrirModalMensagemNova("${idPessoa}", "${nomePessoa.replace(/"/g, '&quot;')}")' 
+                                        class="bg-admin text-white text-sm px-3 py-1 rounded-lg font-medium">
+                                        ✉️ Enviar mensagem nova
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    }
+
                     lista.innerHTML += `
                         <div class="p-4 border rounded-xl ${dados.resposta ? 'bg-green-50 border-green-200' : 'bg-yellow-50 border-yellow-200'}">
                             <div class="flex justify-between items-start mb-2">
-                                <span class="font-bold text-lg">👤 ${dados.nomeRemetente || 'Visitante'}</span>
+                                <span class="font-bold text-lg">📩 Mensagem de ${nomePessoa}</span>
                                 ${status}
                             </div>
                             <p class="text-gray-800 mb-2">${dados.texto}</p>
@@ -638,7 +696,7 @@
                 carregarApoiadores();
                 carregarTodasMensagensAdmin();
 
-                alert("🔓 Acesso liberado! Você vê TODAS as mensagens!");
+                alert("🔓 Acesso liberado! Você pode responder ou enviar mensagens individuais!");
             } else {
                 document.getElementById('avisoErro').classList.remove('escondido');
                 document.getElementById('campoSenha').value = '';
