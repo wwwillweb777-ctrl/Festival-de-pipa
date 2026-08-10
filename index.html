@@ -15,8 +15,6 @@
                         participante: '#10B981',
                         patrocinador: '#F59E0B',
                         admin: '#7C3AED',
-                        chatMeu: '#0284c7',
-                        chatResposta: '#10B981',
                         sairAdmin: '#dc2626',
                     }
                 }
@@ -164,7 +162,7 @@
     <!-- 💬 MODAL DO CHAT -->
     <div id="modalChat" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 escondido">
         <div class="bg-white rounded-2xl w-full max-w-md mx-4 flex flex-col max-h-[90vh]">
-            <!-- CABEÇALHO DO CHAT → BOTÃO SAIR NO LUGAR DO X -->
+            <!-- CABEÇALHO DO CHAT -->
             <div class="p-4 border-b flex justify-between items-center bg-sky-50 rounded-t-2xl">
                 <h3 class="font-bold text-sky-800">💬 Fale Conosco</h3>
                 <button onclick="fecharChat()" class="botao-sair px-4 py-1 rounded-lg font-medium text-sm">
@@ -174,16 +172,30 @@
 
             <!-- ÁREA DAS MENSAGENS -->
             <div id="areaMensagens" class="area-chat p-4 space-y-3 bg-gray-50">
-                <p class="text-gray-400 text-sm text-center py-4">Olá! Escreva sua mensagem abaixo que entraremos em contato!</p>
+                <p class="text-gray-400 text-sm text-center py-4">Olá! Digite seu nome abaixo e depois sua mensagem!</p>
             </div>
 
-            <!-- CAMPO DE DIGITAÇÃO -->
-            <div class="p-4 border-t flex gap-2">
-                <input type="text" id="campoMensagem" placeholder="Digite sua mensagem..."
-                    class="flex-1 px-4 py-2 border rounded-full outline-none focus:ring-2 focus:ring-sky-200">
-                <button onclick="enviarMensagem()" class="bg-primario text-white px-4 py-2 rounded-full font-bold">
-                    <i class="fa fa-paper-plane"></i>
+            <!-- PASSO 1: PEDIR NOME -->
+            <div id="passoNome" class="p-4 border-t space-y-3">
+                <label class="block text-sm font-medium text-gray-700">📝 Qual é o seu nome?</label>
+                <input type="text" id="nomeChat" placeholder="Digite seu nome aqui..."
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-200 focus:border-primario outline-none">
+                <button onclick="confirmarNome()" 
+                    class="w-full bg-primario text-white font-bold py-2 px-4 rounded-lg hover:bg-sky-700 transition">
+                    ✅ Confirmar Nome
                 </button>
+            </div>
+
+            <!-- PASSO 2: ESCREVER MENSAGEM → SÓ APARECE DEPOIS DE DIGITAR O NOME -->
+            <div id="passoMensagem" class="p-4 border-t space-y-2 escondido">
+                <p class="text-sm text-green-600 font-medium">✅ Olá, <span id="nomeExibido"></span>! Agora escreva sua mensagem:</p>
+                <div class="flex gap-2">
+                    <input type="text" id="campoMensagem" placeholder="Escreva sua mensagem..."
+                        class="flex-1 px-4 py-2 border border-gray-300 rounded-full outline-none focus:ring-2 focus:ring-sky-200">
+                    <button onclick="enviarMensagem()" class="bg-primario text-white px-4 py-2 rounded-full font-bold">
+                        <i class="fa fa-paper-plane"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -229,8 +241,9 @@
         // SENHA DE ACESSO ADMINISTRATIVO
         const SENHA_ADMIN = "WJ321";
         let acessoLiberado = false;
+        let nomeUsuarioChat = ""; // ✅ GUARDA O NOME DA PESSOA NO CHAT
 
-        // 🆔 ID ÚNICO do visitante (salvo no próprio celular dele)
+        // 🆔 ID ÚNICO do visitante
         const ID_VISITANTE = localStorage.getItem("idVisitante") || ("usr_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9));
         localStorage.setItem("idVisitante", ID_VISITANTE);
 
@@ -307,14 +320,14 @@
 
         // ✅ APAGAR TODOS OS PARTICIPANTES
         async function limparTodosParticipantes() {
-            if (!confirm("⚠️⚠️⚠️ TEM CERTEZA? Isso vai APAGAR TODOS os participantes de uma vez! Não tem volta!")) return;
+            if (!confirm("⚠️⚠️⚠️ TEM CERTEZA? Isso vai APAGAR TODOS os participantes!")) return;
             await db.ref("festival_pipas/participantes").remove();
             alert("✅ Todos os participantes foram apagados!");
         }
 
         // ✅ APAGAR TODOS OS APOIADORES
         async function limparTodosApoiadores() {
-            if (!confirm("⚠️⚠️⚠️ TEM CERTEZA? Isso vai APAGAR TODOS os apoiadores de uma vez! Não tem volta!")) return;
+            if (!confirm("⚠️⚠️⚠️ TEM CERTEZA? Isso vai APAGAR TODOS os apoiadores!")) return;
             await db.ref("festival_pipas/apoiadores").remove();
             alert("✅ Todos os apoiadores foram apagados!");
         }
@@ -333,17 +346,12 @@
                     contador++;
 
                     const botaoExcluir = acessoLiberado 
-                        ? `<button onclick="excluirParticipante('${chave}')" class="text-red-500 ml-3 flex-shrink-0" title="Excluir">
-                            <i class="fa fa-trash"></i>
-                           </button>` 
+                        ? `<button onclick="excluirParticipante('${chave}')" class="text-red-500 ml-2 text-sm">❌</button>` 
                         : '';
 
                     lista.innerHTML += `
-                        <div class="p-3 bg-green-50 rounded-lg mb-2 flex justify-between items-center">
-                            <div>
-                                <p class="font-medium text-green-900">🪁 ${dados.nome}</p>
-                                <p class="text-xs text-gray-500">${dados.data}</p>
-                            </div>
+                        <div class="p-2 bg-green-50 rounded flex justify-between items-center">
+                            <span class="text-sm">🪁 ${dados.nome}</span>
                             ${botaoExcluir}
                         </div>
                     `;
@@ -370,18 +378,12 @@
                     contador++;
 
                     const botaoExcluir = acessoLiberado 
-                        ? `<button onclick="excluirApoiador('${chave}')" class="text-red-500 ml-3 flex-shrink-0" title="Excluir">
-                            <i class="fa fa-trash"></i>
-                           </button>` 
+                        ? `<button onclick="excluirApoiador('${chave}')" class="text-red-500 ml-2 text-sm">❌</button>` 
                         : '';
 
                     lista.innerHTML += `
-                        <div class="p-3 bg-amber-50 rounded-lg mb-2 flex justify-between items-start">
-                            <div>
-                                <p class="font-medium text-amber-900">⭐ ${dados.nome}</p>
-                                <p class="text-sm text-amber-700">Apoio: ${dados.oferta || '-'}</p>
-                                <p class="text-xs text-gray-500">${dados.data}</p>
-                            </div>
+                        <div class="p-2 bg-amber-50 rounded flex justify-between items-center">
+                            <span class="text-sm">⭐ ${dados.nome}</span>
                             ${botaoExcluir}
                         </div>
                     `;
@@ -394,27 +396,49 @@
             });
         }
 
-        // 💬 FUNÇÕES DO CHAT
+        // 💬 ABRIR CHAT
         function abrirChat() {
             document.getElementById('modalChat').classList.remove('escondido');
+            // Reseta para o passo do nome
+            document.getElementById('passoNome').classList.remove('escondido');
+            document.getElementById('passoMensagem').classList.add('escondido');
+            document.getElementById('nomeChat').value = '';
+            document.getElementById('campoMensagem').value = '';
+            nomeUsuarioChat = "";
             carregarMensagensDoChat();
         }
+
         function fecharChat() {
             document.getElementById('modalChat').classList.add('escondido');
         }
 
-        // ✅ ENVIAR MENSAGEM DO USUÁRIO
+        // ✅ PASSO 1: CONFIRMAR NOME
+        function confirmarNome() {
+            const nome = document.getElementById('nomeChat').value.trim();
+            if (!nome) { alert("⚠️ Digite seu nome!"); return; }
+            
+            nomeUsuarioChat = nome;
+            document.getElementById('nomeExibido').textContent = nome;
+            
+            // Esconde o passo do nome e mostra o passo da mensagem
+            document.getElementById('passoNome').classList.add('escondido');
+            document.getElementById('passoMensagem').classList.remove('escondido');
+        }
+
+        // ✅ PASSO 2: ENVIAR MENSAGEM — JÁ COM O NOME
         async function enviarMensagem() {
             const texto = document.getElementById('campoMensagem').value.trim();
-            if (!texto) return;
+            if (!texto) { alert("⚠️ Escreva sua mensagem!"); return; }
+            if (!nomeUsuarioChat) { alert("⚠️ Digite seu nome primeiro!"); return; }
 
             try {
                 await db.ref("festival_pipas/mensagens").push({
                     idRemetente: ID_VISITANTE,
-                    nomeRemetente: "Visitante",
+                    nomeRemetente: nomeUsuarioChat, // ✅ NOME QUE A PESSOA DIGITOU
                     texto: texto,
                     data: dataAtual(),
-                    resposta: null
+                    resposta: null,
+                    dataResposta: null
                 });
                 document.getElementById('campoMensagem').value = '';
             } catch (e) {
@@ -422,18 +446,25 @@
             }
         }
 
-        // ✅ CARREGA SOMENTE AS MENSAGENS DAQUELA PESSOA — SEM LIXEIRA PARA O PÚBLICO
+        // ✅ CARREGA SOMENTE AS MENSAGENS DESTE USUÁRIO
         function carregarMensagensDoChat() {
             const area = document.getElementById('areaMensagens');
-            db.ref("festival_pipas/mensagens").orderByChild("idRemetente").equalTo(ID_VISITANTE).on("value", (snap) => {
+            
+            db.ref("festival_pipas/mensagens")
+              .orderByChild("idRemetente")
+              .equalTo(ID_VISITANTE)
+              .on("value", (snap) => {
                 area.innerHTML = '';
+                let temMensagem = false;
+
                 snap.forEach((item) => {
+                    temMensagem = true;
                     const m = item.val();
-                    const chave = item.key;
                     
-                    // Mensagem do usuário — SEM LIXEIRA PARA O PÚBLICO
+                    // Mensagem enviada
                     area.innerHTML += `
                         <div class="mensagem mensagem-me px-4 py-2 mb-1">
+                            <p class="font-medium text-sm">${m.nomeRemetente}</p>
                             <p>${m.texto}</p>
                             <p class="text-xs opacity-70 mt-1">${m.data}</p>
                         </div>
@@ -444,15 +475,21 @@
                             <div class="mensagem mensagem-resposta px-4 py-2 mb-1">
                                 <p class="font-semibold text-sm text-green-700 mb-1">📩 Resposta:</p>
                                 <p>${m.resposta}</p>
+                                <p class="text-xs opacity-70 mt-1">${m.dataResposta || ''}</p>
                             </div>
                         `;
                     }
                 });
+
+                if (!temMensagem) {
+                    area.innerHTML = '<p class="text-gray-400 text-sm text-center py-4">Olá! Digite seu nome abaixo e depois sua mensagem!</p>';
+                }
+
                 area.scrollTop = area.scrollHeight;
             });
         }
 
-        // 🔐 ÁREA DO ADMINISTRADOR — RESPONDER E EXCLUIR MENSAGENS
+        // 🔐 RESPONDER MENSAGEM
         function fecharModalResposta() {
             document.getElementById('modalResposta').classList.add('escondido');
         }
@@ -474,28 +511,27 @@
                 resposta: resposta,
                 dataResposta: dataAtual()
             });
-            alert("✅ Resposta enviada! A pessoa já vai ver!");
+            alert("✅ Resposta enviada!");
             fecharModalResposta();
         }
 
-        // ✅ EXCLUIR UMA MENSAGEM (SÓ ADMIN)
+        // ✅ EXCLUIR UMA MENSAGEM
         async function excluirMensagem(chave) {
-            if (!confirm("⚠️ Tem certeza que deseja EXCLUIR esta mensagem? Não tem volta!")) return;
+            if (!confirm("⚠️ Tem certeza que deseja excluir esta mensagem?")) return;
             await db.ref("festival_pipas/mensagens/" + chave).remove();
             alert("✅ Mensagem excluída!");
         }
 
-        // ✅ APAGAR TODAS AS MENSAGENS DE UMA VEZ (SÓ ADMIN)
+        // ✅ APAGAR TODAS AS MENSAGENS
         async function limparTodasMensagens() {
-            if (!confirm("⚠️⚠️⚠️ TEM CERTEZA? Isso vai APAGAR TODAS as mensagens de TODAS as pessoas! Não tem volta!")) return;
+            if (!confirm("⚠️⚠️⚠️ TEM CERTEZA? Isso vai APAGAR TODAS as mensagens!")) return;
             await db.ref("festival_pipas/mensagens").remove();
-            alert("✅ TODAS as mensagens foram apagadas!");
+            alert("✅ Todas as mensagens foram apagadas!");
         }
 
-        // 🔐 CARREGA TODAS AS MENSAGENS PARA O ADMINISTRADOR VER, RESPONDER E EXCLUIR
+        // 🔐 ADMIN VÊ TODAS AS MENSAGENS
         function carregarTodasMensagensAdmin() {
             db.ref("festival_pipas/mensagens").on("value", (snap) => {
-                // Verifica se já existe a área de mensagens no HTML, senão cria
                 if (!document.getElementById('painel-mensagens-admin')) {
                     const container = document.createElement('div');
                     container.id = 'painel-mensagens-admin';
@@ -505,47 +541,59 @@
                             <h2 class="text-lg font-bold text-admin flex items-center gap-2">
                                 <i class="fa fa-comments"></i> Mensagens Recebidas
                             </h2>
-                            <button onclick="limparTodasMensagens()" class="bg-red-500 hover:bg-red-600 text-white text-sm px-3 py-1 rounded-lg font-medium">
+                            <button onclick="limparTodasMensagens()" class="bg-red-500 hover:bg-red-600 text-white text-sm px-4 py-2 rounded-lg font-medium">
                                 🗑️ Apagar Todas
                             </button>
                         </div>
-                        <div id="lista-mensagens-admin" class="space-y-3 max-h-96 overflow-y-auto"></div>
+                        <div id="lista-mensagens-admin" class="space-y-4 max-h-[600px] overflow-y-auto"></div>
                     `;
                     document.querySelector('main').appendChild(container);
                 }
 
                 const lista = document.getElementById('lista-mensagens-admin');
                 lista.innerHTML = '';
+                let temMensagem = false;
 
                 snap.forEach((item) => {
+                    temMensagem = true;
                     const chave = item.key;
                     const dados = item.val();
                     const status = dados.resposta 
-                        ? '<span class="text-green-600 text-xs">✅ Respondida</span>' 
-                        : '<span class="text-red-500 text-xs font-bold">⏳ Pendente</span>';
+                        ? '<span class="text-green-600 text-sm font-medium">✅ Respondida</span>' 
+                        : '<span class="text-red-500 text-sm font-bold">⏳ Pendente</span>';
 
                     lista.innerHTML += `
-                        <div class="p-3 border rounded-lg ${dados.resposta ? 'bg-green-50' : 'bg-yellow-50'}">
+                        <div class="p-4 border rounded-xl ${dados.resposta ? 'bg-green-50 border-green-200' : 'bg-yellow-50 border-yellow-200'}">
                             <div class="flex justify-between items-start mb-2">
-                                <span class="font-semibold text-sm">${dados.nomeRemetente || 'Visitante'}</span>
+                                <span class="font-bold text-lg">👤 ${dados.nomeRemetente || 'Visitante'}</span>
                                 ${status}
                             </div>
                             <p class="text-gray-800 mb-2">${dados.texto}</p>
-                            <p class="text-xs text-gray-500 mb-2">${dados.data}</p>
-                            ${dados.resposta ? `<p class="text-sm text-green-700 bg-green-100 p-2 rounded mb-2">📩 ${dados.resposta}</p>` : ''}
-                            <div class="flex gap-2 mt-2">
+                            <p class="text-sm text-gray-500 mb-3">📅 ${dados.data}</p>
+                            ${dados.resposta ? `
+                                <div class="bg-green-100 p-3 rounded-lg mb-3">
+                                    <p class="text-sm font-semibold text-green-800 mb-1">📩 Sua Resposta:</p>
+                                    <p class="text-green-900">${dados.resposta}</p>
+                                    ${dados.dataResposta ? `<p class="text-xs text-green-600 mt-1">${dados.dataResposta}</p>` : ''}
+                                </div>
+                            ` : ''}
+                            <div class="flex gap-2">
                                 <button onclick='abrirModalResponderMensagem("${chave}", ${JSON.stringify(dados).replace(/'/g, "\\'")})' 
-                                    class="text-sm bg-admin text-white px-3 py-1 rounded">
-                                    ${dados.resposta ? 'Editar Resposta' : '✍️ Responder'}
+                                    class="px-4 py-2 rounded-lg text-white font-medium ${dados.resposta ? 'bg-admin' : 'bg-admin'}">
+                                    ${dados.resposta ? '✏️ Editar Resposta' : '✍️ Responder'}
                                 </button>
                                 <button onclick="excluirMensagem('${chave}')" 
-                                    class="text-sm bg-red-500 text-white px-3 py-1 rounded">
+                                    class="px-4 py-2 rounded-lg bg-red-500 text-white font-medium">
                                     🗑️ Excluir
                                 </button>
                             </div>
                         </div>
                     `;
                 });
+
+                if (!temMensagem) {
+                    lista.innerHTML = '<p class="text-gray-400 text-center py-8">Nenhuma mensagem recebida ainda 💬</p>';
+                }
             });
         }
 
@@ -554,27 +602,21 @@
             if (!confirm("⚠️ Tem certeza que deseja sair da Área Administrativa?")) return;
             
             acessoLiberado = false;
-
-            // Esconde os botões de exclusão
             document.getElementById('btnLimparParticipantes').classList.add('escondido');
             document.getElementById('btnLimparApoiadores').classList.add('escondido');
-
-            // Troca os botões: aparece "Entrar" e esconde "Sair"
             document.getElementById('botaoEntrarArea').classList.remove('escondido');
             document.getElementById('botaoSairArea').classList.add('escondido');
-
-            // Remove o painel de mensagens administrativas
+            
             const painel = document.getElementById('painel-mensagens-admin');
             if (painel) painel.remove();
 
             alert("✅ Você saiu da Área Administrativa!");
             
-            // Recarrega as listas sem os botões de exclusão
             carregarParticipantes();
             carregarApoiadores();
         }
 
-        // 🔐 FUNÇÕES DA ÁREA ADMINISTRATIVA
+        // 🔐 ENTRAR NA ÁREA ADMINISTRATIVA
         function abrirModalSenha() {
             document.getElementById('modalSenha').classList.remove('escondido');
             document.getElementById('campoSenha').value = '';
@@ -591,11 +633,8 @@
                 acessoLiberado = true;
                 fecharModalSenha();
 
-                // Mostra os botões de exclusão
                 document.getElementById('btnLimparParticipantes').classList.remove('escondido');
                 document.getElementById('btnLimparApoiadores').classList.remove('escondido');
-
-                // Troca os botões: esconde "Entrar" e aparece "Sair"
                 document.getElementById('botaoEntrarArea').classList.add('escondido');
                 document.getElementById('botaoSairArea').classList.remove('escondido');
 
@@ -603,14 +642,14 @@
                 carregarApoiadores();
                 carregarTodasMensagensAdmin();
 
-                alert("🔓 Acesso liberado! Você vê TODAS as mensagens, pode responder e excluir!");
+                alert("🔓 Acesso liberado! Você vê TODAS as mensagens!");
             } else {
                 document.getElementById('avisoErro').classList.remove('escondido');
                 document.getElementById('campoSenha').value = '';
             }
         }
 
-        // 🔄 CARREGA TUDO QUANDO A PÁGINA ABRIR
+        // 🔄 INICIAR TUDO
         carregarParticipantes();
         carregarApoiadores();
     </script>
