@@ -186,7 +186,7 @@
                 </button>
             </div>
 
-            <!-- PASSO 2: ESCREVER MENSAGEM → SÓ APARECE DEPOIS DE DIGITAR O NOME -->
+            <!-- PASSO 2: ESCREVER MENSAGEM -->
             <div id="passoMensagem" class="p-4 border-t space-y-2 escondido">
                 <p class="text-sm text-green-600 font-medium">✅ Olá, <span id="nomeExibido"></span>! Agora escreva sua mensagem:</p>
                 <div class="flex gap-2">
@@ -241,7 +241,7 @@
         // SENHA DE ACESSO ADMINISTRATIVO
         const SENHA_ADMIN = "WJ321";
         let acessoLiberado = false;
-        let nomeUsuarioChat = ""; // ✅ GUARDA O NOME DA PESSOA NO CHAT
+        let nomeUsuarioChat = "";
 
         // 🆔 ID ÚNICO do visitante
         const ID_VISITANTE = localStorage.getItem("idVisitante") || ("usr_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9));
@@ -399,7 +399,6 @@
         // 💬 ABRIR CHAT
         function abrirChat() {
             document.getElementById('modalChat').classList.remove('escondido');
-            // Reseta para o passo do nome
             document.getElementById('passoNome').classList.remove('escondido');
             document.getElementById('passoMensagem').classList.add('escondido');
             document.getElementById('nomeChat').value = '';
@@ -420,12 +419,11 @@
             nomeUsuarioChat = nome;
             document.getElementById('nomeExibido').textContent = nome;
             
-            // Esconde o passo do nome e mostra o passo da mensagem
             document.getElementById('passoNome').classList.add('escondido');
             document.getElementById('passoMensagem').classList.remove('escondido');
         }
 
-        // ✅ PASSO 2: ENVIAR MENSAGEM — JÁ COM O NOME
+        // ✅ PASSO 2: ENVIAR MENSAGEM
         async function enviarMensagem() {
             const texto = document.getElementById('campoMensagem').value.trim();
             if (!texto) { alert("⚠️ Escreva sua mensagem!"); return; }
@@ -434,7 +432,7 @@
             try {
                 await db.ref("festival_pipas/mensagens").push({
                     idRemetente: ID_VISITANTE,
-                    nomeRemetente: nomeUsuarioChat, // ✅ NOME QUE A PESSOA DIGITOU
+                    nomeRemetente: nomeUsuarioChat,
                     texto: texto,
                     data: dataAtual(),
                     resposta: null,
@@ -446,7 +444,7 @@
             }
         }
 
-        // ✅ CARREGA SOMENTE AS MENSAGENS DESTE USUÁRIO
+        // ✅ CARREGA SOMENTE AS MENSAGENS DESTE USUÁRIO (PRIVACIDADE)
         function carregarMensagensDoChat() {
             const area = document.getElementById('areaMensagens');
             
@@ -461,7 +459,6 @@
                     temMensagem = true;
                     const m = item.val();
                     
-                    // Mensagem enviada
                     area.innerHTML += `
                         <div class="mensagem mensagem-me px-4 py-2 mb-1">
                             <p class="font-medium text-sm">${m.nomeRemetente}</p>
@@ -469,7 +466,6 @@
                             <p class="text-xs opacity-70 mt-1">${m.data}</p>
                         </div>
                     `;
-                    // Resposta do administrador
                     if (m.resposta) {
                         area.innerHTML += `
                             <div class="mensagem mensagem-resposta px-4 py-2 mb-1">
@@ -529,7 +525,7 @@
             alert("✅ Todas as mensagens foram apagadas!");
         }
 
-        // 🔐 ADMIN VÊ TODAS AS MENSAGENS
+        // 🔐 ADMIN VÊ TODAS AS MENSAGENS — SEM FILTRO!
         function carregarTodasMensagensAdmin() {
             db.ref("festival_pipas/mensagens").on("value", (snap) => {
                 if (!document.getElementById('painel-mensagens-admin')) {
@@ -579,7 +575,7 @@
                             ` : ''}
                             <div class="flex gap-2">
                                 <button onclick='abrirModalResponderMensagem("${chave}", ${JSON.stringify(dados).replace(/'/g, "\\'")})' 
-                                    class="px-4 py-2 rounded-lg text-white font-medium ${dados.resposta ? 'bg-admin' : 'bg-admin'}">
+                                    class="px-4 py-2 rounded-lg text-white font-medium bg-admin">
                                     ${dados.resposta ? '✏️ Editar Resposta' : '✍️ Responder'}
                                 </button>
                                 <button onclick="excluirMensagem('${chave}')" 
