@@ -15,6 +15,9 @@
                         participante: '#10B981',
                         patrocinador: '#F59E0B',
                         admin: '#7C3AED',
+                        chatMeu: '#0284c7',
+                        chatResposta: '#10B981',
+                        sairAdmin: '#dc2626',
                     }
                 }
             }
@@ -23,6 +26,12 @@
     <style>
         .sombra-card { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
         .escondido { display: none !important; }
+        .mensagem { max-width: 80%; word-wrap: break-word; }
+        .mensagem-me { margin-left: auto; background-color: #0284c7; color: white; border-radius: 1rem 1rem 0.25rem 1rem; }
+        .mensagem-resposta { margin-right: auto; background-color: #f0fdf4; color: #166534; border-radius: 1rem 1rem 1rem 0.25rem; border: 1px solid #bbf7d0; }
+        .area-chat { height: 320px; overflow-y: auto; }
+        .botao-sair { background: #ffffff; color: #dc2626; border: 1px solid #fecaca; }
+        .botao-sair:hover { background: #fef2f2; color: #b91c1c; }
     </style>
 </head>
 <body class="bg-sky-50 min-h-screen font-sans">
@@ -42,7 +51,7 @@
         <p class="text-lg text-sky-600 mt-5 font-semibold">✨ Vamos participar!</p>
     </header>
 
-    <main class="container mx-auto px-4 max-w-5xl pb-12 mt-8">
+    <main class="container mx-auto px-4 max-w-5xl pb-6 mt-8">
         <div class="grid md:grid-cols-2 gap-8 mb-10">
 
             <!-- PARTICIPANTE -->
@@ -122,13 +131,81 @@
             </div>
         </div>
 
-        <!-- 🔐 ÁREA ADMINISTRATIVA -->
-        <div class="text-center mt-10">
-            <button onclick="abrirModalSenha()" class="text-gray-500 text-sm hover:text-admin transition">
-                🔐 Área Administrativa
+        <!-- 💬 BOTÃO FALE CONOSCO -->
+        <div class="text-center mt-8">
+            <button onclick="abrirChat()" class="bg-primario hover:bg-sky-700 text-white font-bold py-3 px-6 rounded-xl transition shadow-md">
+                💬 Fale Conosco — Envie sua mensagem
             </button>
         </div>
+
+        <!-- 🔐 ÁREA ADMINISTRATIVA + BOTÃO SAIR -->
+        <div class="text-center mt-6 mb-6 space-y-2">
+            <button onclick="abrirModalSenha()" id="botaoEntrarArea" class="text-gray-500 text-sm hover:text-admin transition">
+                🔐 Área Administrativa
+            </button>
+            <button onclick="sairAreaAdministrativa()" id="botaoSairArea" class="escondido bg-sairAdmin text-white font-bold py-2 px-4 rounded-lg text-sm shadow">
+                🚪 Sair da Área Administrativa
+            </button>
+        </div>
+
+        <!-- ⚠️ ISENÇÃO DE RESPONSABILIDADE -->
+        <div class="bg-amber-50 border border-amber-200 p-4 rounded-lg text-center mt-4">
+            <p class="text-amber-900 text-sm leading-relaxed">
+                ⚠️ <strong>Aviso Importante:</strong> Este site é apenas um espaço de inscrição e divulgação. 
+                Quem criou esta página <strong>não é o organizador do evento</strong> e 
+                <strong>não assume nenhuma responsabilidade</strong> sobre sua realização, 
+                segurança, estrutura, autorizações ou quaisquer questões relacionadas ao festival. 
+                A participação é voluntária e de responsabilidade de cada pessoa.
+            </p>
+        </div>
+
     </main>
+
+    <!-- 💬 MODAL DO CHAT -->
+    <div id="modalChat" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 escondido">
+        <div class="bg-white rounded-2xl w-full max-w-md mx-4 flex flex-col max-h-[90vh]">
+            <!-- CABEÇALHO DO CHAT → BOTÃO SAIR NO LUGAR DO X -->
+            <div class="p-4 border-b flex justify-between items-center bg-sky-50 rounded-t-2xl">
+                <h3 class="font-bold text-sky-800">💬 Fale Conosco</h3>
+                <button onclick="fecharChat()" class="botao-sair px-4 py-1 rounded-lg font-medium text-sm">
+                    Sair
+                </button>
+            </div>
+
+            <!-- ÁREA DAS MENSAGENS -->
+            <div id="areaMensagens" class="area-chat p-4 space-y-3 bg-gray-50">
+                <p class="text-gray-400 text-sm text-center py-4">Olá! Escreva sua mensagem abaixo que entraremos em contato!</p>
+            </div>
+
+            <!-- CAMPO DE DIGITAÇÃO -->
+            <div class="p-4 border-t flex gap-2">
+                <input type="text" id="campoMensagem" placeholder="Digite sua mensagem..."
+                    class="flex-1 px-4 py-2 border rounded-full outline-none focus:ring-2 focus:ring-sky-200">
+                <button onclick="enviarMensagem()" class="bg-primario text-white px-4 py-2 rounded-full font-bold">
+                    <i class="fa fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 💬 MODAL DE RESPOSTA DO ADMINISTRADOR -->
+    <div id="modalResposta" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 escondido">
+        <div class="bg-white rounded-2xl w-full max-w-lg mx-4 p-6">
+            <h3 class="font-bold text-xl mb-4 text-admin">🔐 Responder Mensagem</h3>
+            <p class="text-sm text-gray-500 mb-2">Mensagem de:</p>
+            <p id="remetenteMensagem" class="font-medium text-gray-800 mb-3"></p>
+            <p class="text-sm text-gray-500 mb-2">Mensagem:</p>
+            <p id="textoMensagemRecebida" class="bg-gray-100 p-3 rounded-lg mb-4 text-gray-800"></p>
+            <input type="hidden" id="chaveMensagemAtual">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Sua resposta:</label>
+            <textarea id="textoResposta" rows="3" placeholder="Escreva sua resposta aqui..."
+                class="w-full px-4 py-3 border rounded-lg mb-4"></textarea>
+            <div class="flex gap-3">
+                <button onclick="fecharModalResposta()" class="flex-1 bg-gray-200 rounded-lg py-2">Cancelar</button>
+                <button onclick="enviarResposta()" class="flex-1 bg-admin text-white rounded-lg py-2">✅ Enviar Resposta</button>
+            </div>
+        </div>
+    </div>
 
     <!-- MODAL DE SENHA -->
     <div id="modalSenha" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 escondido">
@@ -152,6 +229,10 @@
         // SENHA DE ACESSO ADMINISTRATIVO
         const SENHA_ADMIN = "WJ321";
         let acessoLiberado = false;
+
+        // 🆔 ID ÚNICO do visitante (salvo no próprio celular dele)
+        const ID_VISITANTE = localStorage.getItem("idVisitante") || ("usr_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9));
+        localStorage.setItem("idVisitante", ID_VISITANTE);
 
         // INICIA FIREBASE
         const firebaseConfig = {
@@ -251,7 +332,6 @@
                     const chave = item.key;
                     contador++;
 
-                    // Só mostra a lixeira se estiver logado como admin
                     const botaoExcluir = acessoLiberado 
                         ? `<button onclick="excluirParticipante('${chave}')" class="text-red-500 ml-3 flex-shrink-0" title="Excluir">
                             <i class="fa fa-trash"></i>
@@ -289,7 +369,6 @@
                     const chave = item.key;
                     contador++;
 
-                    // Só mostra a lixeira se estiver logado como admin
                     const botaoExcluir = acessoLiberado 
                         ? `<button onclick="excluirApoiador('${chave}')" class="text-red-500 ml-3 flex-shrink-0" title="Excluir">
                             <i class="fa fa-trash"></i>
@@ -315,6 +394,186 @@
             });
         }
 
+        // 💬 FUNÇÕES DO CHAT
+        function abrirChat() {
+            document.getElementById('modalChat').classList.remove('escondido');
+            carregarMensagensDoChat();
+        }
+        function fecharChat() {
+            document.getElementById('modalChat').classList.add('escondido');
+        }
+
+        // ✅ ENVIAR MENSAGEM DO USUÁRIO
+        async function enviarMensagem() {
+            const texto = document.getElementById('campoMensagem').value.trim();
+            if (!texto) return;
+
+            try {
+                await db.ref("festival_pipas/mensagens").push({
+                    idRemetente: ID_VISITANTE,
+                    nomeRemetente: "Visitante",
+                    texto: texto,
+                    data: dataAtual(),
+                    resposta: null
+                });
+                document.getElementById('campoMensagem').value = '';
+            } catch (e) {
+                alert("❌ Erro ao enviar: " + e.message);
+            }
+        }
+
+        // ✅ CARREGA SOMENTE AS MENSAGENS DAQUELA PESSOA — SEM LIXEIRA PARA O PÚBLICO
+        function carregarMensagensDoChat() {
+            const area = document.getElementById('areaMensagens');
+            db.ref("festival_pipas/mensagens").orderByChild("idRemetente").equalTo(ID_VISITANTE).on("value", (snap) => {
+                area.innerHTML = '';
+                snap.forEach((item) => {
+                    const m = item.val();
+                    const chave = item.key;
+                    
+                    // Mensagem do usuário — SEM LIXEIRA PARA O PÚBLICO
+                    area.innerHTML += `
+                        <div class="mensagem mensagem-me px-4 py-2 mb-1">
+                            <p>${m.texto}</p>
+                            <p class="text-xs opacity-70 mt-1">${m.data}</p>
+                        </div>
+                    `;
+                    // Resposta do administrador
+                    if (m.resposta) {
+                        area.innerHTML += `
+                            <div class="mensagem mensagem-resposta px-4 py-2 mb-1">
+                                <p class="font-semibold text-sm text-green-700 mb-1">📩 Resposta:</p>
+                                <p>${m.resposta}</p>
+                            </div>
+                        `;
+                    }
+                });
+                area.scrollTop = area.scrollHeight;
+            });
+        }
+
+        // 🔐 ÁREA DO ADMINISTRADOR — RESPONDER E EXCLUIR MENSAGENS
+        function fecharModalResposta() {
+            document.getElementById('modalResposta').classList.add('escondido');
+        }
+
+        async function abrirModalResponderMensagem(chave, dados) {
+            document.getElementById('chaveMensagemAtual').value = chave;
+            document.getElementById('remetenteMensagem').textContent = dados.nomeRemetente || "Sem nome";
+            document.getElementById('textoMensagemRecebida').textContent = dados.texto;
+            document.getElementById('textoResposta').value = dados.resposta || "";
+            document.getElementById('modalResposta').classList.remove('escondido');
+        }
+
+        async function enviarResposta() {
+            const chave = document.getElementById('chaveMensagemAtual').value;
+            const resposta = document.getElementById('textoResposta').value.trim();
+            if (!resposta) { alert("⚠️ Escreva uma resposta!"); return; }
+
+            await db.ref("festival_pipas/mensagens/" + chave).update({
+                resposta: resposta,
+                dataResposta: dataAtual()
+            });
+            alert("✅ Resposta enviada! A pessoa já vai ver!");
+            fecharModalResposta();
+        }
+
+        // ✅ EXCLUIR UMA MENSAGEM (SÓ ADMIN)
+        async function excluirMensagem(chave) {
+            if (!confirm("⚠️ Tem certeza que deseja EXCLUIR esta mensagem? Não tem volta!")) return;
+            await db.ref("festival_pipas/mensagens/" + chave).remove();
+            alert("✅ Mensagem excluída!");
+        }
+
+        // ✅ APAGAR TODAS AS MENSAGENS DE UMA VEZ (SÓ ADMIN)
+        async function limparTodasMensagens() {
+            if (!confirm("⚠️⚠️⚠️ TEM CERTEZA? Isso vai APAGAR TODAS as mensagens de TODAS as pessoas! Não tem volta!")) return;
+            await db.ref("festival_pipas/mensagens").remove();
+            alert("✅ TODAS as mensagens foram apagadas!");
+        }
+
+        // 🔐 CARREGA TODAS AS MENSAGENS PARA O ADMINISTRADOR VER, RESPONDER E EXCLUIR
+        function carregarTodasMensagensAdmin() {
+            db.ref("festival_pipas/mensagens").on("value", (snap) => {
+                // Verifica se já existe a área de mensagens no HTML, senão cria
+                if (!document.getElementById('painel-mensagens-admin')) {
+                    const container = document.createElement('div');
+                    container.id = 'painel-mensagens-admin';
+                    container.className = 'mt-8 bg-white rounded-2xl sombra-card p-6';
+                    container.innerHTML = `
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-lg font-bold text-admin flex items-center gap-2">
+                                <i class="fa fa-comments"></i> Mensagens Recebidas
+                            </h2>
+                            <button onclick="limparTodasMensagens()" class="bg-red-500 hover:bg-red-600 text-white text-sm px-3 py-1 rounded-lg font-medium">
+                                🗑️ Apagar Todas
+                            </button>
+                        </div>
+                        <div id="lista-mensagens-admin" class="space-y-3 max-h-96 overflow-y-auto"></div>
+                    `;
+                    document.querySelector('main').appendChild(container);
+                }
+
+                const lista = document.getElementById('lista-mensagens-admin');
+                lista.innerHTML = '';
+
+                snap.forEach((item) => {
+                    const chave = item.key;
+                    const dados = item.val();
+                    const status = dados.resposta 
+                        ? '<span class="text-green-600 text-xs">✅ Respondida</span>' 
+                        : '<span class="text-red-500 text-xs font-bold">⏳ Pendente</span>';
+
+                    lista.innerHTML += `
+                        <div class="p-3 border rounded-lg ${dados.resposta ? 'bg-green-50' : 'bg-yellow-50'}">
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="font-semibold text-sm">${dados.nomeRemetente || 'Visitante'}</span>
+                                ${status}
+                            </div>
+                            <p class="text-gray-800 mb-2">${dados.texto}</p>
+                            <p class="text-xs text-gray-500 mb-2">${dados.data}</p>
+                            ${dados.resposta ? `<p class="text-sm text-green-700 bg-green-100 p-2 rounded mb-2">📩 ${dados.resposta}</p>` : ''}
+                            <div class="flex gap-2 mt-2">
+                                <button onclick='abrirModalResponderMensagem("${chave}", ${JSON.stringify(dados).replace(/'/g, "\\'")})' 
+                                    class="text-sm bg-admin text-white px-3 py-1 rounded">
+                                    ${dados.resposta ? 'Editar Resposta' : '✍️ Responder'}
+                                </button>
+                                <button onclick="excluirMensagem('${chave}')" 
+                                    class="text-sm bg-red-500 text-white px-3 py-1 rounded">
+                                    🗑️ Excluir
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+            });
+        }
+
+        // 🚪 SAIR DA ÁREA ADMINISTRATIVA
+        function sairAreaAdministrativa() {
+            if (!confirm("⚠️ Tem certeza que deseja sair da Área Administrativa?")) return;
+            
+            acessoLiberado = false;
+
+            // Esconde os botões de exclusão
+            document.getElementById('btnLimparParticipantes').classList.add('escondido');
+            document.getElementById('btnLimparApoiadores').classList.add('escondido');
+
+            // Troca os botões: aparece "Entrar" e esconde "Sair"
+            document.getElementById('botaoEntrarArea').classList.remove('escondido');
+            document.getElementById('botaoSairArea').classList.add('escondido');
+
+            // Remove o painel de mensagens administrativas
+            const painel = document.getElementById('painel-mensagens-admin');
+            if (painel) painel.remove();
+
+            alert("✅ Você saiu da Área Administrativa!");
+            
+            // Recarrega as listas sem os botões de exclusão
+            carregarParticipantes();
+            carregarApoiadores();
+        }
+
         // 🔐 FUNÇÕES DA ÁREA ADMINISTRATIVA
         function abrirModalSenha() {
             document.getElementById('modalSenha').classList.remove('escondido');
@@ -332,15 +591,19 @@
                 acessoLiberado = true;
                 fecharModalSenha();
 
-                // ✅ MOSTRA OS BOTÕES DE APAGAR TUDO
+                // Mostra os botões de exclusão
                 document.getElementById('btnLimparParticipantes').classList.remove('escondido');
                 document.getElementById('btnLimparApoiadores').classList.remove('escondido');
 
-                // ✅ RECARREGA A LISTA PARA APARECER AS LIXEIRAS
+                // Troca os botões: esconde "Entrar" e aparece "Sair"
+                document.getElementById('botaoEntrarArea').classList.add('escondido');
+                document.getElementById('botaoSairArea').classList.remove('escondido');
+
                 carregarParticipantes();
                 carregarApoiadores();
+                carregarTodasMensagensAdmin();
 
-                alert("🔓 Acesso liberado! Agora aparecem as lixeiras e o botão 'Apagar Tudo'!");
+                alert("🔓 Acesso liberado! Você vê TODAS as mensagens, pode responder e excluir!");
             } else {
                 document.getElementById('avisoErro').classList.remove('escondido');
                 document.getElementById('campoSenha').value = '';
