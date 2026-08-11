@@ -7,23 +7,30 @@ let notifConfig = JSON.parse(localStorage.getItem("notifConfig")) || {
 };
 let listaNotificacoes = JSON.parse(localStorage.getItem("notificacoes")) || [];
 
-// ✅ VERIFICA SE É ADMINISTRADOR
+// ✅ FUNCÃO GARANTIDA: VERIFICA SE É ADMINISTRADOR
 function souAdministrador() {
-    return localStorage.getItem("acessoAdministrativo") === "liberado";
+    const acesso = localStorage.getItem("acessoAdministrativo");
+    console.log("🔍 Verificando se é admin:", acesso); // VAI APARECER NO CONSOLE
+    return acesso === "liberado";
 }
 
 // ==========================================
-// ✅ FUNÇÃO PRINCIPAL — ADMIN RECEBE TUDO!
+// ✅ FUNÇÃO PRINCIPAL — ADMIN RECEBE TUDO SEM EXCEÇÃO!
 // ==========================================
 function adicionarNotificacao(tipo, titulo, mensagem) {
-    console.log("🔔 Nova notificação:", tipo, titulo, mensagem);
+    console.log("🔔 NOVA NOTIFICAÇÃO — Tipo:", tipo, "| Titulo:", titulo, "| Mensagem:", mensagem);
+    console.log("👑 É ADMINISTRADOR?", souAdministrador());
 
-    // ✅ ADMIN RECEBE TUDO | Usuário comum segue a configuração
-    if (!souAdministrador() && !notifConfig[tipo]) {
-        console.log("⚠️ Tipo desativado:", tipo);
-        return;
+    // ✅ SE FOR ADMIN → RECEBE TUDO, SEM OLHAR CONFIGURAÇÃO!
+    if (!souAdministrador()) {
+        // Usuário comum → segue a configuração
+        if (!notifConfig[tipo]) {
+            console.log("⚠️ Usuário comum — tipo desativado:", tipo);
+            return;
+        }
     }
 
+    // ✅ MONTA A NOTIFICAÇÃO
     const notif = {
         id: Date.now(),
         tipo: tipo,
@@ -37,16 +44,21 @@ function adicionarNotificacao(tipo, titulo, mensagem) {
     if (listaNotificacoes.length > 30) listaNotificacoes.pop();
     localStorage.setItem("notificacoes", JSON.stringify(listaNotificacoes));
 
+    console.log("✅ Notificação salva! Total:", listaNotificacoes.length);
+    
     mostrarNotifNaTela(notif);
     atualizarContadorNotif();
 }
 
 // ==========================================
-// ✅ NOTIFICAÇÃO FLUTUANTE — NÃO SOBREPÕE JANELAS
+// ✅ NOTIFICAÇÃO FLUTUANTE — FICA LÁ EMBAIXO! NÃO APARECE MAIS POR CIMA!
 // ==========================================
 function mostrarNotifNaTela(notif) {
     const caixa = document.getElementById('caixaNotificacoes');
-    if (!caixa) return;
+    if (!caixa) {
+        console.log("⚠️ Caixa de notificações NÃO encontrada!");
+        return;
+    }
 
     const cor = {
         mensagem: '#0284c7',
@@ -67,7 +79,8 @@ function mostrarNotifNaTela(notif) {
         animation: desce 0.3s ease-out;
         max-width: 300px;
         position: relative;
-        z-index: 40;
+        z-index: 10; /* ✅ FICA MUITO EMBAIXO — JANELAS ESTÃO EM 50! */
+        pointer-events: none; /* ✅ NÃO BLOQUEIA CLIQUES! */
     `;
     div.innerHTML = `
         <p style="font-weight:bold; margin:0 0 4px 0;">${notif.titulo}</p>
@@ -79,7 +92,7 @@ function mostrarNotifNaTela(notif) {
 }
 
 // ==========================================
-// ✅ APAGAR UMA NOTIFICAÇÃO POR VEZ
+// ✅ APAGAR UMA POR VEZ
 // ==========================================
 function apagarNotificacao(indice) {
     listaNotificacoes.splice(indice, 1);
@@ -89,7 +102,7 @@ function apagarNotificacao(indice) {
 }
 
 // ==========================================
-// ✅ APAGAR TODAS AS NOTIFICAÇÕES DE UMA VEZ
+// ✅ APAGAR TODAS DE UMA VEZ
 // ==========================================
 function apagarTodasNotificacoes() {
     if (confirm('Tem certeza que deseja apagar TODAS as notificações?')) {
@@ -101,7 +114,7 @@ function apagarTodasNotificacoes() {
 }
 
 // ==========================================
-// ✅ CONTADOR E BOTÕES
+// ✅ DEMAIS FUNÇÕES
 // ==========================================
 function atualizarContadorNotif() {
     const naoLidas = listaNotificacoes.filter(n => !n.lida).length;
@@ -128,9 +141,6 @@ function atualizarBotoesNotif() {
     });
 }
 
-// ==========================================
-// ✅ JANELA DE NOTIFICAÇÕES — COM LIXEIRA EM CADA UMA!
-// ==========================================
 function abrirNotificacoes() {
     const modal = document.getElementById('modalNotificacoes');
     if (modal) { modal.classList.remove('escondido'); renderizarListaNotificacoes(); }
