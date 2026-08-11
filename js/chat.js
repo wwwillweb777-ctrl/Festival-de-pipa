@@ -50,14 +50,18 @@ async function enviarMensagem() {
             resposta: null,
             dataResposta: null
         });
+
+        // ✅ NOTIFICAÇÃO SALVA NO BANCO — VOCÊ RECEBE!
+        await db.ref("festival_pipas/notificacoes").push({
+            tipo: 'mensagem',
+            titulo: '💬 NOVA MENSAGEM RECEBIDA!',
+            mensagem: `${nomeUsuarioChat} escreveu: "${texto}"`,
+            data: dataAtual(),
+            lida: false
+        });
+
         campoMsg.value = '';
-        
-        // ✅ Confirmação para quem mandou
-        adicionarNotificacao('mensagem', '💬 Mensagem Enviada!', `${nomeUsuarioChat}, sua mensagem foi enviada!`);
-        
-        // ✅ NOTIFICAÇÃO PARA VOCÊ (DONO)
-        adicionarNotificacao('mensagem', '💬 NOVA MENSAGEM RECEBIDA!', `${nomeUsuarioChat} escreveu: "${texto}"`);
-        
+        alert("✅ Mensagem enviada!");
     } catch (e) { alert("❌ Erro: " + e.message); }
 }
 
@@ -82,7 +86,6 @@ function carregarMensagensDoChat() {
                 `;
                 if (m.resposta && m.dataResposta !== ultimaRespostaRecebida) {
                     ultimaRespostaRecebida = m.dataResposta;
-                    adicionarNotificacao('resposta', '📩 Você recebeu uma resposta!', `${NOME_REMETENTE_ADMIN} respondeu sua mensagem!`);
                 }
                 if (m.resposta) {
                     area.innerHTML += `
