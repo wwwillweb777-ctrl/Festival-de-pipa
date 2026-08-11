@@ -90,25 +90,24 @@
 }
 
 /* ========================================== */
-/* ✅ AQUI ESTÁ A CORREÇÃO PRINCIPAL! */
+/* ✅ CORREÇÃO — NOTIFICAÇÕES NÃO ATRAPALHAM MAIS! */
 /* ========================================== */
-/* NOTIFICAÇÃO FLUTUANTE — FICA LÁ EMBAIXO! NÃO APARECE POR CIMA! */
 .caixa-notif {
     position: fixed;
     top: 70px;
     right: 15px;
-    z-index: 10; /* ✅ FICA BEM EMBAIXO — JANELAS FICAM POR CIMA! */
-    pointer-events: none; /* ✅ NÃO BLOQUEIA CLIQUES! */
+    z-index: 10; /* ✅ FICA EMBAIXO — NÃO BLOQUEIA NADA! */
+    pointer-events: none; /* ✅ NÃO ATRAPALHA OS CLIQUES! */
     max-width: 320px;
 }
 
-/* ✅ TODAS AS JANELAS FICAM SEMPRE POR CIMA DA NOTIFICAÇÃO */
+/* ✅ TODAS AS JANELAS FICAM SEMPRE POR CIMA! */
 #modalNotificacoes,
 #modalConfiguracoesNotif,
 #modalChat,
 #modalResposta,
 #modalSenha {
-    z-index: 9999 !important; /* ✅ JANELAS FICAM NO TOPO! */
+    z-index: 9999 !important; /* ✅ JANELAS FICAM NO TOPO SEMPRE! */
 }
 
 .item-notif { animation: aparece 0.3s ease-out; }
