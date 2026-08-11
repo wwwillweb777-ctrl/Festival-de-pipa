@@ -1,26 +1,29 @@
-// ✅ COMEÇA COM TUDO LIGADO — VOCÊ RECEBE TUDO POR PADRÃO!
 let notifConfig = JSON.parse(localStorage.getItem("notifConfig")) || {
-    mensagem: true,        // ✅ Recebe mensagens do chat
-    resposta: true,        // ✅ Recebe quando alguém responde
-    participante: true,    // ✅ Recebe quando alguém se cadastra
-    apoiador: true,        // ✅ Recebe quando alguém quer patrocinar
-    atualizacao: true      // ✅ Recebe avisos do sistema
+    mensagem: true,
+    resposta: true,
+    participante: true,
+    apoiador: true,
+    atualizacao: true
 };
 let listaNotificacoes = JSON.parse(localStorage.getItem("notificacoes")) || [];
 
+// ✅ VERIFICA SE É ADMINISTRADOR
+function souAdministrador() {
+    return localStorage.getItem("acessoAdministrativo") === "liberado";
+}
+
 // ==========================================
-// ✅ FUNÇÃO PRINCIPAL — RESPEITA O QUE ESTÁ MARCADO
+// ✅ FUNÇÃO PRINCIPAL — ADMIN RECEBE TUDO!
 // ==========================================
 function adicionarNotificacao(tipo, titulo, mensagem) {
     console.log("🔔 Nova notificação:", tipo, titulo, mensagem);
 
-    // ✅ Se estiver marcado SIM → CHEGA! Se NÃO → não chega
-    if (!notifConfig[tipo]) {
+    // ✅ ADMIN RECEBE TUDO | Usuário comum segue a configuração
+    if (!souAdministrador() && !notifConfig[tipo]) {
         console.log("⚠️ Tipo desativado:", tipo);
         return;
     }
 
-    // Monta a notificação
     const notif = {
         id: Date.now(),
         tipo: tipo,
@@ -30,7 +33,6 @@ function adicionarNotificacao(tipo, titulo, mensagem) {
         data: new Date().toLocaleString('pt-BR')
     };
 
-    // Salva e mostra
     listaNotificacoes.unshift(notif);
     if (listaNotificacoes.length > 30) listaNotificacoes.pop();
     localStorage.setItem("notificacoes", JSON.stringify(listaNotificacoes));
@@ -40,7 +42,7 @@ function adicionarNotificacao(tipo, titulo, mensagem) {
 }
 
 // ==========================================
-// ✅ MOSTRA NOTIFICAÇÃO NA TELA
+// ✅ NOTIFICAÇÃO FLUTUANTE — NÃO SOBREPÕE JANELAS
 // ==========================================
 function mostrarNotifNaTela(notif) {
     const caixa = document.getElementById('caixaNotificacoes');
@@ -64,6 +66,8 @@ function mostrarNotifNaTela(notif) {
         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         animation: desce 0.3s ease-out;
         max-width: 300px;
+        position: relative;
+        z-index: 40;
     `;
     div.innerHTML = `
         <p style="font-weight:bold; margin:0 0 4px 0;">${notif.titulo}</p>
@@ -75,7 +79,29 @@ function mostrarNotifNaTela(notif) {
 }
 
 // ==========================================
-// ✅ CONTADOR E BOTÕES — FUNCIONAM NORMALMENTE
+// ✅ APAGAR UMA NOTIFICAÇÃO POR VEZ
+// ==========================================
+function apagarNotificacao(indice) {
+    listaNotificacoes.splice(indice, 1);
+    localStorage.setItem("notificacoes", JSON.stringify(listaNotificacoes));
+    renderizarListaNotificacoes();
+    atualizarContadorNotif();
+}
+
+// ==========================================
+// ✅ APAGAR TODAS AS NOTIFICAÇÕES DE UMA VEZ
+// ==========================================
+function apagarTodasNotificacoes() {
+    if (confirm('Tem certeza que deseja apagar TODAS as notificações?')) {
+        listaNotificacoes = [];
+        localStorage.setItem("notificacoes", JSON.stringify(listaNotificacoes));
+        renderizarListaNotificacoes();
+        atualizarContadorNotif();
+    }
+}
+
+// ==========================================
+// ✅ CONTADOR E BOTÕES
 // ==========================================
 function atualizarContadorNotif() {
     const naoLidas = listaNotificacoes.filter(n => !n.lida).length;
@@ -102,50 +128,64 @@ function atualizarBotoesNotif() {
     });
 }
 
+// ==========================================
+// ✅ JANELA DE NOTIFICAÇÕES — COM LIXEIRA EM CADA UMA!
+// ==========================================
 function abrirNotificacoes() {
     const modal = document.getElementById('modalNotificacoes');
     if (modal) { modal.classList.remove('escondido'); renderizarListaNotificacoes(); }
 }
+
 function fecharNotificacoes() {
     const modal = document.getElementById('modalNotificacoes');
     if (modal) modal.classList.add('escondido');
 }
+
 function renderizarListaNotificacoes() {
     const lista = document.getElementById('listaNotificacoes');
     if (!lista) return;
+
     if (listaNotificacoes.length === 0) {
         lista.innerHTML = '<p class="text-gray-400 text-center py-8">Nenhuma notificação ainda 🔔</p>';
         return;
     }
+
     lista.innerHTML = '';
     listaNotificacoes.forEach((notif, indice) => {
         const corFundo = notif.lida ? 'bg-gray-50' : 'bg-sky-50';
         lista.innerHTML += `
-            <div class="p-3 rounded-lg border ${corFundo} ${notif.lida ? 'opacity-60' : ''}">
-                <p class="font-bold text-sm">${notif.titulo}</p>
-                <p class="text-sm text-gray-700">${notif.mensagem}</p>
-                <p class="text-xs text-gray-400 mt-1">${notif.data}</p>
-                ${!notif.lida ? `<button onclick="marcarLida(${indice})" class="text-xs text-primario mt-1">✓ Marcar lida</button>` : ''}
+            <div class="p-3 rounded-lg border ${corFundo} ${notif.lida ? 'opacity-60' : ''} flex justify-between items-start gap-2">
+                <div class="flex-1">
+                    <p class="font-bold text-sm">${notif.titulo}</p>
+                    <p class="text-sm text-gray-700">${notif.mensagem}</p>
+                    <p class="text-xs text-gray-400 mt-1">${notif.data}</p>
+                    ${!notif.lida ? `<button onclick="marcarLida(${indice})" class="text-xs text-primario mt-1">✓ Marcar lida</button>` : ''}
+                </div>
+                <button onclick="apagarNotificacao(${indice})" class="text-red-500 hover:text-red-700 text-lg font-bold px-1" title="Apagar">🗑️</button>
             </div>
         `;
     });
 }
+
 function marcarLida(indice) {
     listaNotificacoes[indice].lida = true;
     localStorage.setItem("notificacoes", JSON.stringify(listaNotificacoes));
     renderizarListaNotificacoes();
     atualizarContadorNotif();
 }
+
 function marcarTodasLidas() {
     listaNotificacoes.forEach(n => n.lida = true);
     localStorage.setItem("notificacoes", JSON.stringify(listaNotificacoes));
     renderizarListaNotificacoes();
     atualizarContadorNotif();
 }
+
 function abrirConfiguracoesNotif() {
     const modal = document.getElementById('modalConfiguracoesNotif');
     if (modal) { modal.classList.remove('escondido'); atualizarBotoesNotif(); }
 }
+
 function fecharConfiguracoesNotif() {
     const modal = document.getElementById('modalConfiguracoesNotif');
     if (modal) modal.classList.add('escondido');
