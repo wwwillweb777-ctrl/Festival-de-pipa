@@ -19,24 +19,24 @@
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
-/* ===== 🔔 SININHO ATUALIZADO — PRONTO PARA O EMOJI! ===== */
+/* ===== 🔔 SININHO ===== */
 .botao-sininho {
     position: relative;
-    background: #ffffff;          /* ✅ FUNDO BRANCO */
-    color: #FACC15;              /* ✅ COR AMARELA BRILHANTE */
-    border: 1px solid #000000;   /* ✅ BORDA FINA PRETA */
+    background: #ffffff;
+    color: #FACC15;
+    border: 1px solid #000000;
     width: 48px;
     height: 48px;
     border-radius: 50%;
-    font-size: 24px;              /* ✅ TAMANHO PERFEITO DO EMOJI */
+    font-size: 24px;
     cursor: pointer;
     box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-    display: flex;                /* ✅ CENTRALIZA O EMOJI */
-    align-items: center;          /* ✅ ALINHA VERTICALMENTE */
-    justify-content: center;      /* ✅ ALINHA HORIZONTALMENTE */
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 .botao-sininho:hover { 
-    background: #fef9c3;         /* ✅ FUNDO AMARELO CLARINHO AO PASSAR O DEDO */
+    background: #fef9c3;
 }
 .botao-sininho span {
     position: absolute;
@@ -88,11 +88,34 @@
     0%, 100% { transform: scale(1); }
     50% { transform: scale(1.2); }
 }
-.caixa-notif { position: fixed; top: 70px; right: 15px; z-index: 9999; max-width: 320px; }
+
+/* ========================================== */
+/* ✅ AQUI ESTÁ A CORREÇÃO PRINCIPAL! */
+/* ========================================== */
+/* NOTIFICAÇÃO FLUTUANTE — FICA LÁ EMBAIXO! NÃO APARECE POR CIMA! */
+.caixa-notif {
+    position: fixed;
+    top: 70px;
+    right: 15px;
+    z-index: 10; /* ✅ FICA BEM EMBAIXO — JANELAS FICAM POR CIMA! */
+    pointer-events: none; /* ✅ NÃO BLOQUEIA CLIQUES! */
+    max-width: 320px;
+}
+
+/* ✅ TODAS AS JANELAS FICAM SEMPRE POR CIMA DA NOTIFICAÇÃO */
+#modalNotificacoes,
+#modalConfiguracoesNotif,
+#modalChat,
+#modalResposta,
+#modalSenha {
+    z-index: 9999 !important; /* ✅ JANELAS FICAM NO TOPO! */
+}
+
 .item-notif { animation: aparece 0.3s ease-out; }
 @keyframes aparece {
     from { opacity: 0; transform: translateY(-10px); }
     to { opacity: 1; transform: translateY(0); }
 }
+
 .toggle-ativo { background-color: #10B981; color: white; }
 .toggle-desativado { background-color: #d1d5db; color: #4b5563; }
