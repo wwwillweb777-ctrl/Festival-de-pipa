@@ -22,3 +22,49 @@ async function salvarApoiador() {
         alert("✅ Agradecemos o apoio! ⭐");
     } catch (e) { alert("❌ Erro: " + e.message); }
 }
+
+async function excluirParticipante(chave) { if(!confirm("⚠️ Tem certeza?")) return; await db.ref("festival_pipas/participantes/"+chave).remove(); alert("✅ Excluído!"); }
+async function excluirApoiador(chave) { if(!confirm("⚠️ Tem certeza?")) return; await db.ref("festival_pipas/apoiadores/"+chave).remove(); alert("✅ Excluído!"); }
+async function limparTodosParticipantes() { if(!confirm("⚠️ TEM CERTEZA?")) return; await db.ref("festival_pipas/participantes").remove(); alert("✅ Todos apagados!"); }
+async function limparTodosApoiadores() { if(!confirm("⚠️ TEM CERTEZA?")) return; await db.ref("festival_pipas/apoiadores").remove(); alert("✅ Todos apagados!"); }
+
+function carregarParticipantes() {
+    db.ref("festival_pipas/participantes").on("value", snap => {
+        const lista = document.getElementById('listaParticipantes');
+        const qtd = document.getElementById('qtdParticipantes');
+        const btnLimpar = document.getElementById('btnLimparParticipantes');
+        lista.innerHTML = ''; let contador = 0;
+        snap.forEach(item => {
+            const d = item.val(); contador++;
+            const del = acessoLiberado ? `<button onclick="excluirParticipante('${item.key}')" class="text-red-500 ml-2 text-sm">❌</button>` : '';
+            lista.innerHTML += `<div class="p-2 bg-green-50 rounded flex justify-between items-center"><span class="text-sm">🪁 ${d.nome}</span>${del}</div>`;
+        });
+        qtd.textContent = contador;
+        if (acessoLiberado && btnLimpar) btnLimpar.classList.remove('escondido');
+        if (contador === 0) lista.innerHTML = '<p class="text-gray-400 text-center py-6">Nenhum participante ainda 🪁</p>';
+    });
+}
+
+function carregarApoiadores() {
+    db.ref("festival_pipas/apoiadores").on("value", snap => {
+        const lista = document.getElementById('listaApoiadores');
+        const qtd = document.getElementById('qtdApoiadores');
+        const btnLimpar = document.getElementById('btnLimparApoiadores');
+        lista.innerHTML = ''; let contador = 0;
+        snap.forEach(item => {
+            const d = item.val(); contador++;
+            const del = acessoLiberado ? `<button onclick="excluirApoiador('${item.key}')" class="text-red-500 ml-2 text-sm">❌</button>` : '';
+            lista.innerHTML += `<div class="p-2 bg-amber-50 rounded flex justify-between items-center"><span class="text-sm">⭐ ${d.nome}</span>${del}</div>`;
+        });
+        qtd.textContent = contador;
+        if (acessoLiberado && btnLimpar) btnLimpar.classList.remove('escondido');
+        if (contador === 0) lista.innerHTML = '<p class="text-gray-400 text-center py-6">Nenhum apoiador ainda ⭐</p>';
+    });
+}
+
+window.onload = function() {
+    carregarParticipantes();
+    carregarApoiadores();
+    atualizarBotoesNotif();
+    atualizarContadorNotif();
+};
