@@ -1,7 +1,6 @@
-// ✅ CHAT — FUNÇÕES SIMPLES E GARANTIDAS
+// ✅ CHAT DO USUÁRIO — SÓ VÊ AS PRÓPRIAS MENSAGENS E RESPOSTAS
 
 function abrirChat() {
-    console.log("✅ Botão clicado! Abrindo chat...");
     document.getElementById('modalChat').classList.remove('escondido');
     document.getElementById('passoNome').classList.remove('escondido');
     document.getElementById('passoMensagem').classList.add('escondido');
@@ -18,10 +17,8 @@ function fecharChat() {
 function confirmarNome() {
     const nome = document.getElementById('nomeChat').value.trim();
     if (!nome) { alert("⚠️ Digite seu nome!"); return; }
-    
     nomeUsuarioChat = nome;
     document.getElementById('nomeExibido').textContent = nome;
-    
     document.getElementById('passoNome').classList.add('escondido');
     document.getElementById('passoMensagem').classList.remove('escondido');
 }
@@ -43,16 +40,17 @@ async function enviarMensagem() {
         document.getElementById('campoMensagem').value = '';
         alert("✅ Mensagem enviada!");
     } catch (e) {
-        alert("❌ Erro ao enviar: " + e.message);
+        alert("❌ Erro: " + e.message);
     }
 }
 
+// ✅ SÓ MOSTRA AS MENSAGENS DESSE USUÁRIO — NÃO MOSTRA NADA DE OUTRA PESSOA
 function carregarMensagensDoChat() {
     const area = document.getElementById('areaMensagens');
     
     db.ref("festival_pipas/mensagens")
       .orderByChild("idRemetente")
-      .equalTo(ID_VISITANTE)
+      .equalTo(ID_VISITANTE) // ← SÓ DELE!
       .on("value", (snap) => {
         area.innerHTML = '';
         let temMensagem = false;
@@ -60,7 +58,8 @@ function carregarMensagensDoChat() {
         snap.forEach((item) => {
             temMensagem = true;
             const m = item.val();
-            
+
+            // ✅ MENSAGEM DO USUÁRIO
             area.innerHTML += `
                 <div class="mensagem mensagem-me px-4 py-2 mb-1">
                     <p class="font-medium text-sm">${m.nomeRemetente}</p>
@@ -68,7 +67,9 @@ function carregarMensagensDoChat() {
                     <p class="text-xs opacity-70 mt-1">${m.data}</p>
                 </div>
             `;
-            if (m.resposta) {
+
+            // ✅ RESPOSTA DO ADMIN — SÓ SE TIVER
+            if (m.resposta && !m.mensagemNovaAdmin) {
                 area.innerHTML += `
                     <div class="mensagem mensagem-resposta px-4 py-2 mb-1">
                         <p class="font-semibold text-sm text-green-700 mb-1">📩 Resposta de: ${NOME_REMETENTE_ADMIN}</p>
@@ -88,10 +89,11 @@ function carregarMensagensDoChat() {
 }
 
 // ==========================================
-// ✅ O RESTO É SÓ PARA O ADMINISTRADOR
+// ✅ TUDO ABAIXO SÓ FUNCIONA SE FOR ADMIN
 // ==========================================
 
 function fecharModalResposta() {
+    if (!acessoLiberado) return;
     document.getElementById('modalResposta').classList.add('escondido');
     document.getElementById('textoResposta').value = '';
 }
@@ -130,20 +132,22 @@ async function enviarResposta() {
 
     try {
         if (chave) {
+            // ✅ RESPONDE MENSAGEM EXISTENTE
             await db.ref("festival_pipas/mensagens/" + chave).update({
                 resposta: texto,
                 dataResposta: dataAtual()
             });
             alert("✅ Resposta enviada para " + nomeDest + "!");
         } else {
+            // ✅ MENSAGEM NOVA DO ADMIN — MARCA PARA NÃO APARECER COMO MENSAGEM DO USUÁRIO
             await db.ref("festival_pipas/mensagens").push({
                 idRemetente: idDest,
                 nomeRemetente: nomeDest,
-                texto: "📩 Resposta de: " + NOME_REMETENTE_ADMIN + "\n" + texto,
+                texto: texto,
                 data: dataAtual(),
                 resposta: texto,
                 dataResposta: dataAtual(),
-                mensagemNovaAdmin: true
+                mensagemNovaAdmin: true // ← MARCADOR ESPECIAL!
             });
             alert("✅ Mensagem enviada para " + nomeDest + "!");
         }
@@ -198,6 +202,8 @@ function carregarTodasMensagensAdmin() {
             temMensagem = true;
             const chave = item.key;
             const dados = item.val();
+            if (dados.mensagemNovaAdmin) return; // ✅ IGNORA MENSAGENS NOVAS DO ADMIN NA LISTA DE ENTRADA
+
             const idPessoa = dados.idRemetente;
             const nomePessoa = dados.nomeRemetente || "Visitante";
             const status = dados.resposta 
