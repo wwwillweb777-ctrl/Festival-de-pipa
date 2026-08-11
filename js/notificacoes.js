@@ -14,7 +14,7 @@ function souAdministrador() {
     return acesso === "liberado";
 }
 
-// ✅ FUNÇÃO PRINCIPAL — ADMIN RECEBE TUDO SEM EXCEÇÃO!
+// ✅ FUNÇÃO PRINCIPAL — AGORA VAI PARA O BANCO! VOCÊ RECEBE EM QUALQUER APARELHO!
 function adicionarNotificacao(tipo, titulo, mensagem) {
     console.log("🔔 NOVA NOTIFICAÇÃO — Tipo:", tipo, "| Título:", titulo, "| Mensagem:", mensagem);
     console.log("👑 É ADMINISTRADOR?", souAdministrador());
@@ -28,7 +28,16 @@ function adicionarNotificacao(tipo, titulo, mensagem) {
         }
     }
 
-    // ✅ MONTA A NOTIFICAÇÃO
+    // ✅ SALVA NO BANCO DE DADOS — ASSIM VOCÊ VÊ DE QUALQUER LUGAR!
+    db.ref("festival_pipas/notificacoes").push({
+        tipo: tipo,
+        titulo: titulo,
+        mensagem: mensagem,
+        data: new Date().toLocaleString('pt-BR'),
+        lida: false
+    });
+
+    // ✅ MONTA A NOTIFICAÇÃO LOCAL
     const notif = {
         id: Date.now(),
         tipo: tipo,
@@ -47,6 +56,32 @@ function adicionarNotificacao(tipo, titulo, mensagem) {
     mostrarNotifNaTela(notif);
     atualizarContadorNotif();
 }
+
+// ✅ CARREGA NOTIFICAÇÕES DO BANCO — SÓ PARA VOCÊ (ADMIN)!
+function carregarNotificacoesDoBanco() {
+    if (!souAdministrador()) return; // ✅ SÓ VOCÊ VÊ AS NOTIFICAÇÕES DO BANCO!
+    
+    db.ref("festival_pipas/notificacoes")
+        .orderByChild("data")
+        .limitToLast(30)
+        .on("value", (snap) => {
+            listaNotificacoes = [];
+            snap.forEach((item) => {
+                const n = item.val();
+                listaNotificacoes.unshift(n);
+            });
+            localStorage.setItem("notificacoes", JSON.stringify(listaNotificacoes));
+            renderizarListaNotificacoes();
+            atualizarContadorNotif();
+        });
+}
+
+// ✅ QUANDO A PÁGINA CARREGAR → BUSCA AS NOTIFICAÇÕES PARA VOCÊ!
+document.addEventListener('DOMContentLoaded', function() {
+    if (souAdministrador()) {
+        carregarNotificacoesDoBanco();
+    }
+});
 
 // ✅ NOTIFICAÇÃO FLUTUANTE
 function mostrarNotifNaTela(notif) {
