@@ -6,6 +6,8 @@
     <title>Festival de Pipas 🪁 — No Tijuco</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/estilo.css">
+
     <script>
         tailwind.config = {
             theme: {
@@ -16,267 +18,23 @@
                         patrocinador: '#F59E0B',
                         admin: '#7C3AED',
                         sairAdmin: '#dc2626',
-                        notif: '#EF4444',
                     }
                 }
             }
         }
     </script>
-    <link rel="stylesheet" href="css/estilo.css">
 </head>
 <body class="bg-sky-50 min-h-screen font-sans">
 
-    <!-- 🔔 BOTÕES FIXOS NO TOPO -->
-    <div class="topo-fixo">
-        <button onclick="abrirNotificacoes()" class="botao-sininho">
-            🔔
-            <span id="contadorNotif" class="escondido">0</span>
-        </button>
-        <button onclick="abrirConfiguracoesNotif()" class="botao-engrenagem">
-            <i class="fa fa-cog"></i>
-        </button>
-    </div>
+    <!-- TODO O CONTEÚDO HTML DA PÁGINA AQUI -->
+    <!-- (cabeçalho, formulários, listas, modais...) -->
 
-    <div id="caixaNotificacoes" class="caixa-notif space-y-2"></div>
-
-    <header class="text-center py-6 px-4 bg-white shadow-sm mt-20">
-        <img src="https://i.postimg.cc/Rh0RYkm2/IMG-20260809-183550-(1).webp" 
-            alt="Festival de Pipas — No Tijuco" 
-            class="mx-auto rounded-xl shadow-lg max-w-2xl w-full h-auto mb-6">
-        <h1 class="text-[clamp(1.8rem,5vw,2.8rem)] font-bold text-sky-800">🪁 FESTIVAL DE PIPAS — NO TIJUCO</h1>
-        <div class="mt-4 max-w-2xl mx-auto space-y-2">
-            <p class="text-lg text-gray-700 font-medium">📍 Rua Sidney Tavares Pereira</p>
-            <p class="text-lg text-gray-700">No pasto, em frente à Rotatória do Bandeirante</p>
-            <p class="text-xl font-bold text-primario mt-3">📅 Dia 16 de Agosto</p>
-        </div>
-        <p class="text-lg text-sky-600 mt-5 font-semibold">✨ Vamos participar!</p>
-    </header>
-
-    <main class="container mx-auto px-4 max-w-5xl pb-6 mt-8">
-        <div class="grid md:grid-cols-2 gap-8 mb-10">
-            <div class="bg-white rounded-2xl sombra-card p-6 border-t-4 border-participante">
-                <h2 class="text-xl font-bold text-participante mb-5 flex items-center gap-2">
-                    <i class="fa fa-user-check"></i> Quero Participar!
-                </h2>
-                <p class="text-gray-600 text-sm mb-5">Inscreva-se para participar do festival!</p>
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Seu Nome Completo</label>
-                        <input type="text" id="nomeParticipante" placeholder="Digite seu nome"
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-200 focus:border-participante outline-none">
-                    </div>
-                    <button onclick="salvarParticipante()"
-                        class="w-full bg-participante hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition">
-                        ✅ Confirmar Participação
-                    </button>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-2xl sombra-card p-6 border-t-4 border-patrocinador">
-                <h2 class="text-xl font-bold text-patrocinador mb-5 flex items-center gap-2">
-                    <i class="fa fa-star"></i> Quero Apoiar / Patrocinar!
-                </h2>
-                <p class="text-gray-600 text-sm mb-5">Quer ajudar de alguma forma?</p>
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Seu Nome</label>
-                        <input type="text" id="nomeApoiador" placeholder="Seu nome"
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-200 focus:border-patrocinador outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">O que você oferece</label>
-                        <textarea id="ofertaApoio" rows="3" placeholder="Ex: doação de pipas, materiais, serviços..."
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-200 focus:border-patrocinador outline-none resize-none"></textarea>
-                    </div>
-                    <button onclick="salvarApoiador()"
-                        class="w-full bg-patrocinador hover:bg-amber-600 text-white font-bold py-3 px-4 rounded-lg transition">
-                        ⭐ Registrar Apoio
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <div class="grid md:grid-cols-2 gap-8">
-            <div class="bg-white rounded-2xl sombra-card p-6">
-                <h2 class="text-lg font-bold text-sky-800 mb-4 flex items-center justify-between">
-                    <span><i class="fa fa-users text-primario mr-2"></i> Participantes</span>
-                    <div class="flex items-center gap-2">
-                        <span id="qtdParticipantes" class="bg-sky-100 text-sky-800 px-3 py-1 rounded-full text-sm">0</span>
-                        <button id="btnLimparParticipantes" onclick="limparTodosParticipantes()" class="escondido text-red-500 text-xs font-medium hover:text-red-700">
-                            🗑️ Apagar Tudo
-                        </button>
-                    </div>
-                </h2>
-                <div id="listaParticipantes" class="space-y-2 max-h-80 overflow-y-auto pr-2">
-                    <p class="text-gray-400 text-center py-6">Nenhum participante ainda 🪁</p>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-2xl sombra-card p-6">
-                <h2 class="text-lg font-bold text-amber-700 mb-4 flex items-center justify-between">
-                    <span><i class="fa fa-heart text-patrocinador mr-2"></i> Apoiadores</span>
-                    <div class="flex items-center gap-2">
-                        <span id="qtdApoiadores" class="bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-sm">0</span>
-                        <button id="btnLimparApoiadores" onclick="limparTodosApoiadores()" class="escondido text-red-500 text-xs font-medium hover:text-red-700">
-                            🗑️ Apagar Tudo
-                        </button>
-                    </div>
-                </h2>
-                <div id="listaApoiadores" class="space-y-2 max-h-80 overflow-y-auto pr-2">
-                    <p class="text-gray-400 text-center py-6">Nenhum apoiador ainda ⭐</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="text-center mt-8">
-            <button onclick="abrirChat()" class="bg-primario hover:bg-sky-700 text-white font-bold py-3 px-6 rounded-xl transition shadow-md">
-                💬 Fale Conosco — Envie sua mensagem
-            </button>
-        </div>
-
-        <div class="text-center mt-6 mb-6 space-y-2">
-            <button onclick="abrirModalSenha()" id="botaoEntrarArea" class="text-gray-500 text-sm hover:text-admin transition">
-                🔐 Área Administrativa
-            </button>
-            <button onclick="sairAreaAdministrativa()" id="botaoSairArea" class="escondido bg-sairAdmin text-white font-bold py-2 px-4 rounded-lg text-sm shadow">
-                🚪 Sair da Área Administrativa
-            </button>
-        </div>
-
-        <div class="bg-amber-50 border border-amber-200 p-4 rounded-lg text-center mt-4">
-            <p class="text-amber-900 text-sm leading-relaxed">
-                ⚠️ <strong>Aviso Importante:</strong> Este site é apenas um espaço de inscrição e divulgação. 
-                Quem criou esta página <strong>não é o organizador do evento</strong> e 
-                <strong>não assume nenhuma responsabilidade</strong> sobre sua realização, 
-                segurança, estrutura, autorizações ou quaisquer questões relacionadas ao festival.
-                A participação é voluntária e de responsabilidade de cada pessoa.
-            </p>
-        </div>
-    </main>
-
-    <!-- ✅ MODAL NOTIFICAÇÕES — COM OS DOIS BOTÕES! -->
-    <div id="modalNotificacoes" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 escondido">
-        <div class="bg-white rounded-2xl w-full max-w-md mx-4 max-h-[80vh] flex flex-col">
-            <div class="p-4 border-b flex justify-between items-center flex-wrap gap-2">
-                <h3 class="font-bold text-lg text-primario">🔔 Notificações</h3>
-                <div class="flex gap-2 items-center">
-                    <button onclick="marcarTodasLidas()" class="text-sm text-gray-500 hover:text-primario">Ler todas</button>
-                    <button onclick="apagarTodasNotificacoes()" class="text-sm text-red-500 hover:text-red-700 font-bold">🗑️ Apagar Todas</button>
-                    <button onclick="fecharNotificacoes()" class="botao-sair-modal">✕ Sair</button>
-                </div>
-            </div>
-            <div id="listaNotificacoes" class="p-4 space-y-3 overflow-y-auto flex-1">
-                <p class="text-gray-400 text-center py-8">Nenhuma notificação ainda 🔔</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL CONFIGURAÇÕES -->
-    <div id="modalConfiguracoesNotif" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 escondido">
-        <div class="bg-white rounded-2xl w-full max-w-md mx-4 p-6">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="font-bold text-xl text-center text-gray-800">⚙️ Suas Notificações</h3>
-                <button onclick="fecharConfiguracoesNotif()" class="botao-sair-modal">✕ Sair</button>
-            </div>
-            <p class="text-sm text-gray-500 mb-4 text-center">Escolha o que você quer receber:</p>
-            <div class="space-y-4">
-                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <span class="font-medium">💬 Mensagens recebidas</span>
-                    <button id="notifMensagem" onclick="alternarNotif('mensagem')" class="px-4 py-1 rounded-full text-sm font-bold toggle-ativo">SIM</button>
-                </div>
-                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <span class="font-medium">📩 Respostas às suas mensagens</span>
-                    <button id="notifResposta" onclick="alternarNotif('resposta')" class="px-4 py-1 rounded-full text-sm font-bold toggle-ativo">SIM</button>
-                </div>
-                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <span class="font-medium">🪁 Novos participantes</span>
-                    <button id="notifParticipante" onclick="alternarNotif('participante')" class="px-4 py-1 rounded-full text-sm font-bold toggle-ativo">SIM</button>
-                </div>
-                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <span class="font-medium">⭐ Novos apoiadores</span>
-                    <button id="notifApoiador" onclick="alternarNotif('apoiador')" class="px-4 py-1 rounded-full text-sm font-bold toggle-ativo">SIM</button>
-                </div>
-                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <span class="font-medium">🔔 Atualizações e avisos</span>
-                    <button id="notifAtualizacao" onclick="alternarNotif('atualizacao')" class="px-4 py-1 rounded-full text-sm font-bold toggle-ativo">SIM</button>
-                </div>
-            </div>
-            <button onclick="fecharConfiguracoesNotif()" class="w-full mt-6 bg-primario text-white py-2 rounded-lg font-bold">✅ Pronto</button>
-        </div>
-    </div>
-
-    <!-- MODAL CHAT -->
-    <div id="modalChat" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 escondido">
-        <div class="bg-white rounded-2xl w-full max-w-md mx-4 flex flex-col max-h-[90vh]">
-            <div class="p-4 border-b flex justify-between items-center bg-sky-50 rounded-t-2xl">
-                <h3 class="font-bold text-sky-800">💬 Fale Conosco</h3>
-                <button onclick="fecharChat()" class="botao-sair-modal">✕ Sair</button>
-            </div>
-            <div id="areaMensagens" class="area-chat p-4 space-y-3 bg-gray-50">
-                <p class="text-gray-400 text-sm text-center py-4">Olá! Digite seu nome abaixo e depois sua mensagem!</p>
-            </div>
-            <div id="passoNome" class="p-4 border-t space-y-3">
-                <label class="block text-sm font-medium text-gray-700">📝 Qual é o seu nome?</label>
-                <input type="text" id="nomeChat" placeholder="Digite seu nome aqui..."
-                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-200 focus:border-primario outline-none">
-                <button onclick="confirmarNome()" 
-                    class="w-full bg-primario text-white font-bold py-2 px-4 rounded-lg hover:bg-sky-700 transition">✅ Confirmar Nome</button>
-            </div>
-            <div id="passoMensagem" class="p-4 border-t space-y-2 escondido">
-                <p class="text-sm text-green-600 font-medium">✅ Olá, <span id="nomeExibido"></span>! Agora escreva sua mensagem:</p>
-                <div class="flex gap-2">
-                    <input type="text" id="campoMensagem" placeholder="Escreva sua mensagem..."
-                        class="flex-1 px-4 py-2 border border-gray-300 rounded-full outline-none focus:ring-2 focus:ring-sky-200">
-                    <button onclick="enviarMensagem()" class="bg-primario text-white px-4 py-2 rounded-full font-bold">
-                        <i class="fa fa-paper-plane"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL RESPOSTA -->
-    <div id="modalResposta" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 escondido">
-        <div class="bg-white rounded-2xl w-full max-w-lg mx-4 p-6">
-            <div class="flex justify-between items-center mb-4">
-                <h3 id="tituloModalResposta" class="font-bold text-xl text-admin">🔐 Responder Mensagem</h3>
-                <button onclick="fecharModalResposta()" class="botao-sair-modal">✕ Sair</button>
-            </div>
-            <p class="text-sm text-gray-500 mb-2">Para:</p>
-            <p id="remetenteMensagem" class="font-medium text-gray-800 mb-3"></p>
-            <input type="hidden" id="chaveMensagemAtual">
-            <input type="hidden" id="idDestinatario">
-            <input type="hidden" id="nomeDestinatario">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Sua mensagem:</label>
-            <textarea id="textoResposta" rows="3" placeholder="Escreva sua mensagem aqui..."
-                class="w-full px-4 py-3 border rounded-lg mb-4"></textarea>
-            <div class="flex gap-3">
-                <button onclick="fecharModalResposta()" class="flex-1 bg-gray-200 rounded-lg py-2">Cancelar</button>
-                <button onclick="enviarResposta()" class="flex-1 bg-admin text-white rounded-lg py-2">✅ Enviar</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL SENHA -->
-    <div id="modalSenha" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 escondido">
-        <div class="bg-white rounded-2xl p-7 w-full max-w-sm mx-4">
-            <h3 class="text-xl font-bold text-center mb-5">🔐 Acesso Restrito</h3>
-            <input type="password" id="campoSenha" placeholder="Digite a senha"
-                class="w-full px-4 py-3 border rounded-lg mb-4 text-center">
-            <p id="avisoErro" class="text-red-500 text-center text-sm mb-3 escondido">Senha incorreta!</p>
-            <div class="flex gap-3">
-                <button onclick="fecharModalSenha()" class="flex-1 bg-gray-200 rounded-lg py-2">Cancelar</button>
-                <button onclick="verificarSenha()" class="flex-1 bg-admin text-white rounded-lg py-2">Entrar</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- FIREBASE E SCRIPTS ORGANIZADOS -->
+    <!-- FIREBASE -->
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
+    <!-- CHAMADA DOS ARQUIVOS SEPARADOS -->
     <script src="js/firebase-config.js"></script>
-    <script src="js/notificacoes.js"></script>
     <script src="js/banco-dados.js"></script>
     <script src="js/chat.js"></script>
     <script src="js/admin.js"></script>
