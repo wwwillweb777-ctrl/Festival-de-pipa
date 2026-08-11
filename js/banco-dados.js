@@ -3,8 +3,17 @@ async function salvarParticipante() {
     if (!nome) { alert("⚠️ Digite seu nome!"); return; }
     try {
         await db.ref("festival_pipas/participantes").push({ nome, data: dataAtual() });
+        
+        // ✅ NOTIFICAÇÃO SALVA NO BANCO — VOCÊ RECEBE!
+        await db.ref("festival_pipas/notificacoes").push({
+            tipo: 'participante',
+            titulo: '🪁 Novo Participante!',
+            mensagem: `${nome} acabou de se inscrever!`,
+            data: dataAtual(),
+            lida: false
+        });
+        
         document.getElementById('nomeParticipante').value = '';
-        adicionarNotificacao('participante', '🪁 Novo Participante!', `${nome} acabou de se inscrever!`);
         alert("✅ Obrigado! Inscrição feita! 🪁");
     } catch (e) { alert("❌ Erro: " + e.message); }
 }
@@ -16,9 +25,18 @@ async function salvarApoiador() {
     if (!oferta) { alert("⚠️ Digite o que você oferece!"); return; }
     try {
         await db.ref("festival_pipas/apoiadores").push({ nome, oferta, data: dataAtual() });
+        
+        // ✅ NOTIFICAÇÃO SALVA NO BANCO — VOCÊ RECEBE!
+        await db.ref("festival_pipas/notificacoes").push({
+            tipo: 'apoiador',
+            titulo: '⭐ Novo Apoiador!',
+            mensagem: `${nome} quer apoiar o evento!`,
+            data: dataAtual(),
+            lida: false
+        });
+        
         document.getElementById('nomeApoiador').value = '';
         document.getElementById('ofertaApoio').value = '';
-        adicionarNotificacao('apoiador', '⭐ Novo Apoiador!', `${nome} quer apoiar o evento!`);
         alert("✅ Agradecemos o apoio! ⭐");
     } catch (e) { alert("❌ Erro: " + e.message); }
 }
@@ -65,6 +83,4 @@ function carregarApoiadores() {
 window.onload = function() {
     carregarParticipantes();
     carregarApoiadores();
-    atualizarBotoesNotif();
-    atualizarContadorNotif();
 };
